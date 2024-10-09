@@ -1,0 +1,10 @@
+I"<p>I am pleased to announce that our research paper titled <strong>Supporting Requesters in Writing Clear Crowdsourcing Task Descriptions Through Computational Flaw Assessment</strong> has been accepted for presentation at the main technical track of Intelligent User Interfaces 2023 (IUI23).</p>
+
+<p>In this work, we introduced an interactive system called ClarifyIT to aid microtask crowdsourcing requesters in identifying and correcting clarity flaws commonly found in crowdsourcing task descriptions, which have been shown to negatively impact the quality of data collected from workers. In contrast to conventional approaches that rely on the assistance of workers or experts and can be time-consuming and expensive, our system employs NLP models trained on real-world task descriptions that provide help in milliseconds without having to spend a single penny. :money_mouth_face:</p>
+
+<p><img src="../../assets/img/ClarifyIT.png" alt="Screenshot of ClarifyIT" width="100%" /></p>
+
+<p>In the evaluation, we not only assessed the usability of ClarifyIT with requesters but also tested the system with actual workers to ensure that the task descriptions produced using ClarifyIT were perceived as high quality. The results of our study indicated that <strong>65%</strong> of requesters found the tool to be helpful or very helpful, and <strong>76%</strong> of workers believed that the overall clarity of task descriptions improved when created using ClarifyIT.</p>
+
+<p><em>I feel fortunate to have had the chance to work with Zahra, <a href="http://ujwalgadiraju.com/">Prof. Gadiraju</a>, and <a href="https://www.ai.uni-hannover.de/de/institut/team/henning-wachsmuth">Prof. Wachsmuth</a> on such a interesting project! I owe them all a huge debt of gratitude for giving me this amazing opportunity.</em> :blush:</p>
+:ET
