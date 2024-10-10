@@ -1,1 +1,1 @@
-## Hi👋, Thanks for thinking I'm interesting enough to check up on. Please visit my [website](https://nix07.github.io/) to get more information.
+## Hi👋, Thanks for thinking I'm interesting enough to check up on. Please visit my  to get more information.
