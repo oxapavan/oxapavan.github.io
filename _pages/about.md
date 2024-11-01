@@ -7,7 +7,7 @@ subtitle: <span class="font-weight-bold">Security Researcher</span> • Studying
 
 profile:
   align: right
-  image: prof_pic.png
+  image: profile.png
   image_circular: false # crops the image to make it circular
   address: >
 
