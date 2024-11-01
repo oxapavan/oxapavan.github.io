@@ -2,18 +2,29 @@
 layout: about
 title: About
 permalink: /
-subtitle: >
-  <h6 class="m-0 mb-2" style="font-size: 0.83em;"><a href="https://ps3lab.github.io" class="page-description" target="_blank">PennState System Security Lab</a></h6>
-  <h6 class="m-0 mb-2" style="font-size: 0.83em;"><a href="https://ist.psu.edu" class="page-description" target="_blank">College of Information Sciences and Technology</a></h6>
-  <h6 class="m-0 mb-2" style="font-size: 0.83em;"><a href="https://www.psu.edu" class="page-description" target="_blank">The Pennsylvania State University</a></h6>
-  <h6 class="m-0 mb-2" style="font-size: 0.83em;"><a href="mailto:songliu@psu.edu" class="page-description" target="_blank">E-Mail: songliu [AT] psu dot edu</a></h6>
+subtitle: <span class="font-weight-bold">Security Researcher</span> • Studying at <a href="https://kluniversity.in" target="_blank">KL University</a>
+ 
 
 profile:
-  align: left
-  image: profile.jpg
+  align: right
+  image: prof_pic.png
+  image_circular: false # crops the image to make it circular
+  address: >
 
-news: true  # includes a list of news items
-selected_papers: true # includes a list of papers marked as "selected={true}"
+news: false # includes a list of news items
+selected_papers: false # includes a list of papers marked as "selected={true}"
+social: true # includes social icons at the bottom of the page
 ---
 
-I am a second-year Ph.D. student at <a href='https://www.psu.edu'>Penn State University</a>, advised by <a href="https://huhong789.github.io">Prof. Hong Hu</a>. Before joining Penn State University, I obtained my Bachelor's degree from Xiamen University and worked at <a href="https://research.qianxin.com/">QI-ANXIN Technology Research Institute</a> for three years. My research interests include Software and System Security.
+Hello there! Thanks for thinking I'm interesting enough to check up on. If you've come this far, I encourage you to say hello before you leave :)
+
+I am a Student at [KL University](https://kluniversity.in/) My research centers on exploring Privilege Escalation, Defense Evasion, Credential Access, Lateral Movement & Many offencive security Mechanism's &  building scalable cybersecurity solutions for resource-limited environments, emphasizing network defense and secure communications.
+
+ I’m *Pavan Alapati*, I love jumping into CTF challenges, breaking into systems (legally!), and figuring out how things work under the hood. When I’m not digging through code or vulnerabilities, I would probably learning new tricks or enjoying nature. Glad you’re here—check out what I’m up to!
+ 
+ I am a rising third-year undergraduate Student at KL University, specializing in computer Science ( Cyber Security ).
+
+As a student, I've been fortunate to receive guidance and support from many people along my journey, and it’s made a huge difference. Now, I’m always happy for helping others and sharing what I’ve learned from my experiences. Please don’t hesitate to reach out if you ever need advice or assistance!
+
+On my blog, I'll post CTF writeups, my CVE findings, and whatever else comes to mind.  In my research, I focus on Red Teaming & Threat Hunting while working with an awesome team of international researchers.
+
