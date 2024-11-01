@@ -20,7 +20,7 @@ Hello there! Thanks for thinking I'm interesting enough to check up on. If you'v
 
 I am a Student at [KL University](https://kluniversity.in/) My research centers on exploring Privilege Escalation, Defense Evasion, Credential Access, Lateral Movement & Many offencive security Mechanism's &  building scalable cybersecurity solutions for resource-limited environments, emphasizing network defense and secure communications.
 
- I’m *Pavan Alapati*, I love jumping into CTF challenges, breaking into systems (legally!), and figuring out how things work under the hood. When I’m not digging through code or vulnerabilities, I would probably learning new tricks or enjoying nature. Glad you’re here—check out what I’m up to!
+ I’m **Pavan Alapati** aka AngryBird I love jumping into CTF challenges, breaking into systems (legally!), and figuring out how things work under the hood. When I’m not digging through code or vulnerabilities, I would probably learning new tricks or enjoying nature. Glad you’re here—check out what I’m up to!
  
  I am a rising third-year undergraduate Student at KL University, specializing in computer Science ( Cyber Security ).
 
