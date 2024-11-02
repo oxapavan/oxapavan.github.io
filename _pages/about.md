@@ -2,8 +2,7 @@
 layout: about
 title: About
 permalink: /
-subtitle: <span class="font-weight-bold">Security Researcher</span> • Studying at <a href="https://kluniversity.in" target="_blank">KL University</a>
- 
+subtitle: <span class="font-weight-bold">Security Researcher</span> 
 
 profile:
   align: right
@@ -22,7 +21,7 @@ I am a Student at [KL University](https://kluniversity.in/) My research centers 
 
  I’m **Pavan Alapati** aka AngryBird, I love jumping into CTF challenges, breaking into systems (legally!), and figuring out how things work under the hood. When I’m not digging through code or vulnerabilities, I would probably learning new tricks or enjoying nature. Glad you’re here—check out what I’m up to!
  
- I am a rising third-year undergraduate Student at KL University, specializing in computer Science ( Cyber Security ).
+ I am a rising third-year undergraduate, Specializing in computer Science ( Cyber Security ).
 
 As a student, I've been fortunate to receive guidance and support from many people along my journey, and it’s made a huge difference. Now, I’m always happy for helping others and sharing what I’ve learned from my experiences. Please don’t hesitate to reach out if you ever need advice or assistance!
 
