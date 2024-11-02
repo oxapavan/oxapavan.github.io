@@ -1,8 +1,6 @@
 ---
 layout: post
 title: Writing an LLVM Pass
-date: 2022-09-05 10:00:00
-tags: ['LLVM', 'analysis']
 ---
 
 
