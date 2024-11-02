@@ -27,7 +27,7 @@ impressum_path:  # set to path to include impressum link in the footer, use the 
 # will use title and url fields
 # Take a look to https://github.com/jekyll/jekyll-feed for more customization
 
-rss_icon: true
+rss_icon: false
 
 # -----------------------------------------------------------------------------
 # Layout
@@ -69,11 +69,12 @@ keybase_username: # your keybase user name
 wikidata_id: # your wikidata id
 dblp_url: # your DBLP profile url
 stackoverflow_id: #your stackoverflow id
+telegram_id: AngryBirdOx01
 
 contact_note: >
   You can even add a little note about which of these is the best way to reach you.
 
-google_analytics: G- # your google-analytics ID (format: UA-XXXXXXXXX)
+google_analytics: # your google-analytics ID (format: UA-XXXXXXXXX)
 google_site_verification:  # your google-site-verification ID (Google Search Console)
 bing_site_verification:  # out your bing-site-verification ID (Bing Webmaster)
 panelbear_analytics:  # panelbear analytics site ID (format: XXXXXXXXX)
@@ -199,8 +200,8 @@ jekyll-archives:
 
 scholar:
 
-  last_name: Liu
-  first_name: Song
+  last_name: Pavan
+  first_name: Alapati
 
   style: apa
   locale: en
