@@ -1,13 +1,51 @@
 ---
 layout: post
-title: WinDBG CheatSheet
+title: Hack Havoc 2.0 CTF Detailed Writeup
 date: 2022-10-24 10:00:00
-tags: ['windbg', 'debug']
+tags: ['pwn', 'web', 'Osint', 'Forensic', 'Cloud']
 ---
 
+## Overview
+I participated in Hack Havoc 2.0 CTF and secured 6th position. The competition featured various categories including Web, Crypto, Forensics, Mobile, and Cloud challenges. This writeup details my approach to each challenge, explaining the thought process and methodology.
 
-## Main Extensions 
 
+
+## Welcome Challenges
+
+### Welcome To CyberMaterial
+**Description:** 
+```
+Welcome to Hack Havoc 2.0. The Premiere CTF Hosted by Cybermaterial.
+Before we start the journey, let's make a detour to our Discord Server and Instagram.
+Friends are crucial for every adventure...
+Flag Format: CM{String}
+```
+
+**Analysis & Solution:**
+1. Initial Approach:
+   - Challenge mentioned Discord and Instagram
+   - Flag format suggested two parts would need to be combined
+   
+2. Discord Investigation:
+   - Joined the Discord server
+   - Explored various channels
+   - Checked Discord bot commands
+   - Found that `/flag` command returned first part of the flag
+
+3. Instagram Search:
+   - Visited CyberMaterial's Instagram profile (@cybermaterial_)
+   - Found second part of flag in profile
+
+### Bonus Challenge
+**Description:** Follow CyberMaterial on LinkedIn and submit proof for bonus points.
+
+**Solution:**
+1. Simple process:
+   - Follow LinkedIn page
+   - Take screenshot
+   - Submit through Google form
+   - Points automatically added
+  
 
 
 ## Symbols 
