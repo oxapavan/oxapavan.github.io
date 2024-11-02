@@ -131,6 +131,10 @@
         {%- capture link -%}https://stackoverflow.com/users/{{ site.stackoverflow_id }}{%- endcapture -%}
         {%- assign sameaslinks = sameaslinks | push: link -%}
     {%- endif -%}
+    {%- if telegram_id -%}
+        {%- capture link -%}https://t.me/{{ site.stackoverflow_id }}{%- endcapture -%}
+        {%- assign sameaslinks = sameaslinks | push: link -%}
+    {%- endif -%}
     {%- if sameaslinks != blank -%}
         {%- assign sameaslinks = sameaslinks | split: "" -%}
     {%- endif -%}
