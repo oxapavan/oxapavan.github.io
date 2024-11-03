@@ -1,7 +1,6 @@
 ---
 layout: page
 permalink: /publications/
-description: <span class='star'>*</span> denotes equal contribution
 years: [2024]
 nav: true
 nav_order: 1
