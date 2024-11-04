@@ -1,7 +1,7 @@
 ---
 layout: page
 permalink: /publications/
-title: "" 
+title: <h1>Research Publications</h1>
 description: <span class='star'>*</span> denotes equal contribution
 years: [2024]
 nav: true
