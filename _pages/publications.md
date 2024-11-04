@@ -1,9 +1,7 @@
 ---
-layout: page
-title: "publications" 
-permalink: /publications/
-nav: true
-nav_order: 1
+layout: about
+title: About
+permalink: /
 ---
 
 <!-- _pages/publications.md -->
