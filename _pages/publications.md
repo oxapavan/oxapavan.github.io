@@ -1,7 +1,7 @@
 ---
 layout: about
 title: About
-permalink: /
+permalink: /publications/
 ---
 
 <!-- _pages/publications.md -->
