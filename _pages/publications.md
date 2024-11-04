@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "publications" # Remove or set to an empty string
+title: "" # Remove or set to an empty string
 permalink: /publications/
 nav: true
 nav_order: 1
