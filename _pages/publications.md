@@ -1,10 +1,14 @@
 ---
 layout: page
 permalink: /publications/
+title: Research Publications
+description: <span class='star'>*</span> denotes equal contribution
 years: [2024]
 nav: true
 nav_order: 1
 ---
+
+
 <!-- _pages/publications.md -->
 
 <div class="publications">
