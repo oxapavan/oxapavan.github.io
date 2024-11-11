@@ -7,7 +7,9 @@ description: Detailed writeup of [PermX](https://app.hackthebox.com/machines/Per
 
 
 
-![img](/assets/HTB/banner.png)
+<div style="display: flex; justify-content: center;">
+  <img src="/assets/HTB/banner.png" alt="HTB Banner" style="max-width: 100%; height: auto; text-align: center;">
+</div>
 
 ### Overview
 PermX focuses on Linux permissions, starting with Chamilo's file upload leading to shell access. Using shared credentials for lateral movement, followed by ACL abuse through symlinks to gain root - with multiple successful and failed paths explored for maximum learning.
