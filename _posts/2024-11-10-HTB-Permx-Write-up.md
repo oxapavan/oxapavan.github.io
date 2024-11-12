@@ -12,7 +12,7 @@ description: Detailed writeup of [PermX](https://app.hackthebox.com/machines/Per
 </div>
 
 ### Overview
-PermX focuses on Linux permissions, starting with Chamilo's file upload leading to shell access. Using shared credentials for lateral movement, followed by ACL abuse through symlinks to gain root - with multiple successful and failed paths explored for maximum learning.
+[PermX](https://app.hackthebox.com/machines/PermX) focuses on Linux permissions, starting with Chamilo's file upload leading to shell access. Using shared credentials for lateral movement, followed by ACL abuse through symlinks to gain root - with multiple successful and failed paths explored for maximum learning.
 
 ### (CVE-2023-4220) Chamilo LMS Unauthenticated Big Upload File Remote Code Execution
 
