@@ -13,7 +13,7 @@ description: Detailed writeup of [PermX](https://app.hackthebox.com/machines/617
 
 ### overview
 
-Greenhorn is a beginner-friendly machine. Starting with credential harvesting to revershell upload & then trying with pdf extraction 
+Greenhorn is a beginner-friendly machine. Starting with credential harvesting to revershell upload & then trying with pdf extraction.
 
 - OS Linux
 - Point's 20
@@ -198,7 +198,7 @@ GENERATED WORDS: 4612
 + http://GreenHorn.htb/servlets-examples (CODE:200|SIZE:2)
 ```
 
-After discovering GreenHorn.htb's admin panel (/admin.php), version 4.7.16 was identified, which is vulnerable to file upload reverse shell exploitation. Further enumeration revealed a service running on port 3000. I started reading code after some time i got ( **GreenAdmin/GreenHorn -> Data -> Settings -> Pass.php** )
+After discovering GreenHorn.htb's admin panel (/admin.php), version 4.7.18 was identified, which is vulnerable to file upload reverse shell exploitation. Further enumeration revealed a service running on port 3000. I started reading code after some time i got ( **GreenAdmin/GreenHorn -> Data -> Settings -> Pass.php** )
 
 In pass.php i got a hash cracked it with crackstation. 
 I found the website is running on pluck 4.7.18 and I searched exploitDB for vulnerabilities associated with this version and I found out that there is a remote code execution exploit which allow potential attacker to upload malicious file in zip format on the website.
