@@ -19,7 +19,7 @@ Greenhorn is a beginner-friendly machine. Starting with credential harvesting to
 - Point's 20
 
 ###  (CVE-2022-26965) Pluck Remote Code Execution
-#### The attacker who already has an account can upload a fake module to the system and can execute the content from this module on the server. The attacker executes an info file from the already fake uploaded module and gets all information for this system. This is a CRITICAL Vulnerability. The problem is that these developers are not making a strong sanitizing upload function and do not restrict the execution from inside of the server.
+##### The attacker who already has an account can upload a fake module to the system and can execute the content from this module on the server. The attacker executes an info file from the already fake uploaded module and gets all information for this system. This is a CRITICAL Vulnerability. The problem is that these developers are not making a strong sanitizing upload function and do not restrict the execution from inside of the server.
 
 ## Recon
 ### nmap
