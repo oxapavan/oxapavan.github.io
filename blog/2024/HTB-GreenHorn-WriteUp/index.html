@@ -1,0 +1,175 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta name="google-site-verification" content=""/> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title>Hackthebox GreenHorn Machine Writeup | </title> <meta name="author" content="Pavan Alapati"/> <meta name="description" content="Detailed writeup of [PermX](https://app.hackthebox.com/machines/617)?"/> <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website"/> <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-DF7Zhf293AJxJNTmh5zhoYYIMs2oXitRfBjY+9L//AY=" crossorigin="anonymous"> <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous"/> <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous"> <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.1/css/academicons.min.css" integrity="sha256-i1+4qU2G2860dGGIOJscdC30s9beBXjFfzjWLjBRsBg=" crossorigin="anonymous"> <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@200&display=swap" rel="stylesheet"> <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/github.css" media="none" id="highlight_theme_light"/> <link rel="shortcut icon" href="/assets/favicon.ico" type="image/x-icon"> <link rel="stylesheet" href="/assets/css/main.css"> <link rel="canonical" href="https://oxapavan.github.io/blog/2024/HTB-GreenHorn-WriteUp/"> <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jwarby/jekyll-pygments-themes@master/native.css" media="none" id="highlight_theme_dark"/> <script src="/assets/js/theme.js"></script> <script src="/assets/js/dark_mode.js"></script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="https://oxapavan.github.io/"></a> <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse text-right" id="navbarNav"> <ul class="navbar-nav ml-auto flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">About</a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">Blog<span class="sr-only">(current)</span></a> </li> <li class="nav-item "> <a class="nav-link" href="/publications/">Research Publications</a> </li> <li class="nav-item "> <a class="nav-link" target="_blank" href="/assets/pdf/resume.pdf">Resume</a> </li> <div class="toggle-container"> <a id="light-toggle"> <i class="fas fa-moon"></i> <i class="fas fa-sun"></i> </a> </div> </ul> </div> </div> </nav> </header> <div class="container mt-5"> <div class="post"> <header class="post-header"> <h1 class="post-title">Hackthebox GreenHorn Machine Writeup</h1> <p class="post-meta">November 12, 2024</p> <p class="post-tags"> <a href="/blog/2024"> <i class="fas fa-calendar fa-sm"></i> 2024 </a>   ·   <a href="/blog/tag/Revershell%20Recon"> <i class="fas fa-hashtag fa-sm"></i> Revershell Recon</a>   </p> </header> <article class="post-content"> <div style="display: flex; justify-content: center;"> <img src="/assets/HTB/banner.png" alt="HTB Banner" style="max-width: 100%; height: auto; text-align: center;"> </div> <h3 id="overview">overview</h3> <p>Greenhorn is a beginner-friendly machine. Starting with credential harvesting to revershell upload &amp; then trying with pdf extraction.</p> <ul> <li>OS Linux</li> <li>Point’s 20</li> </ul> <h3 id="cve-2022-26965-pluck-remote-code-execution">(CVE-2022-26965) Pluck Remote Code Execution</h3> <h5 id="the-attacker-who-already-has-an-account-can-upload-a-fake-module-to-the-system-and-can-execute-the-content-from-this-module-on-the-server-the-attacker-executes-an-info-file-from-the-already-fake-uploaded-module-and-gets-all-information-for-this-system-this-is-a-critical-vulnerability-the-problem-is-that-these-developers-are-not-making-a-strong-sanitizing-upload-function-and-do-not-restrict-the-execution-from-inside-of-the-server">The attacker who already has an account can upload a fake module to the system and can execute the content from this module on the server. The attacker executes an info file from the already fake uploaded module and gets all information for this system. This is a CRITICAL Vulnerability. The problem is that these developers are not making a strong sanitizing upload function and do not restrict the execution from inside of the server.</h5> <h2 id="recon">Recon</h2> <h3 id="nmap">nmap</h3> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──(angrybird㉿kali)-[~/Desktop/Openvpn]
+└─$ nmap -sV -sC 10.10.11.25  
+Starting Nmap 7.94SVN ( https://nmap.org ) 
+Stats: 0:02:13 elapsed; 0 hosts completed (1 up), 1 undergoing Connect Scan
+Connect Scan Timing: About 71.12% done;
+Nmap scan report for 10.10.11.25
+Host is up (0.37s latency).
+Not shown: 997 closed tcp ports (conn-refused)
+PORT     STATE SERVICE VERSION
+22/tcp   open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.10 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   256 57:d6:92:8a:72:44:84:17:29:eb:5c:c9:63:6a:fe:fd (ECDSA)
+|_  256 40:ea:17:b1:b6:c5:3f:42:56:67:4a:3c:ee:75:23:2f (ED25519)
+80/tcp   open  http    nginx 1.18.0 (Ubuntu)
+|_http-title: Did not follow redirect to http://greenhorn.htb/
+3000/tcp open  ppp?
+| fingerprint-strings: 
+|   GenericLines, Help, RTSPRequest: 
+|     HTTP/1.1 400 Bad Request
+|     Content-Type: text/plain; charset=utf-8
+|     Connection: close
+|     Request
+|   GetRequest: 
+|     HTTP/1.0 200 OK
+|     Cache-Control: max-age=0, private, must-revalidate, no-transform
+|     Content-Type: text/html; charset=utf-8
+|     Set-Cookie: i_like_gitea=b8fecf263c1e35a9; Path=/; HttpOnly; SameSite=Lax
+|     Set-Cookie: _csrf=bxkgOSoV_o-2Ply3BAH0UWmMAPU6MTczMTQzMTQ0NDUxMzAyMTk0MQ; Path=/; Max-Age=86400; HttpOnly; SameSite=Lax
+|     X-Frame-Options: SAMEORIGIN
+|     &lt;!DOCTYPE html&gt;
+|     &lt;html lang="en-US" class="theme-auto"&gt;
+|     &lt;head&gt;
+|     &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+|     &lt;title&gt;GreenHorn&lt;/title&gt;
+|     &lt;link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiR3JlZW5Ib3JuIiwic2hvcnRfbmFtZSI6IkdyZWVuSG9ybiIsInN0YXJ0X3VybCI6Imh0dHA6Ly9ncmVlbmhvcm4uaHRiOjMwMDAvIiwiaWNvbnMiOlt7InNyYyI6Imh0dHA6Ly9ncmVlbmhvcm4uaHRiOjMwMDAvYXNzZXRzL2ltZy9sb2dvLnBuZyIsInR5cGUiOiJpbWFnZS9wbmciLCJzaXplcyI6IjUxMng1MTIifSx7InNyYyI6Imh0dHA6Ly9ncmVlbmhvcm4uaHRiOjMwMDAvYX
+|   HTTPOptions: 
+|     HTTP/1.0 405 Method Not Allowed
+|     Allow: HEAD
+|     Allow: HEAD
+|     Allow: GET
+|     Cache-Control: max-age=0, private, must-revalidate, no-transform
+|     Set-Cookie: i_like_gitea=b0bc6ae68de3fbb6; Path=/; HttpOnly; SameSite=Lax
+|     Set-Cookie: _csrf=GoskDxug-DQHcGB4MQuqxdNJXCk6MTczMTQzMTQ2MjM2MjAzMTY4OA; Path=/; Max-Age=86400; HttpOnly; SameSite=Lax
+|     X-Frame-Options: SAMEORIGIN
+|_    Content-Length: 0
+1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
+SF-Port3000-TCP:V=7.94SVN%I=7%D=11/12%Time=67338C13%P=x86_64-pc-linux-gnu%
+SF:r(GenericLines,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\
+SF:x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20B
+SF:ad\x20Request")%r(GetRequest,2A5C,"HTTP/1\.0\x20200\x20OK\r\nCache-Cont
+SF:rol:\x20max-age=0,\x20private,\x20must-revalidate,\x20no-transform\r\nC
+SF:ontent-Type:\x20text/html;\x20charset=utf-8\r\nSet-Cookie:\x20i_like_gi
+SF:tea=b8fecf263c1e35a9;\x20Path=/;\x20HttpOnly;\x20SameSite=Lax\r\nSet-Co
+SF:okie:\x20_csrf=bxkgOSoV_o-2Ply3BAH0UWmMAPU6MTczMTQzMTQ0NDUxMzAyMTk0MQ;\
+SF:x20Path=/;\x20Max-Age=86400;\x20HttpOnly;\x20SameSite=Lax\r\nX-Frame-Op
+SF:tions:\x20SAMEORIGIN\r\nDate:\x20Tue,\x2012\x20Nov\x202024\x2017:10:44\
+SF:x20GMT\r\n\r\n&lt;!DOCTYPE\x20html&gt;\n&lt;html\x20lang=\"en-US\"\x20class=\"th
+SF:eme-auto\"&gt;\n&lt;head&gt;\n\t&lt;meta\x20name=\"viewport\"\x20content=\"width=de
+SF:vice-width,\x20initial-scale=1\"&gt;\n\t&lt;title&gt;GreenHorn&lt;/title&gt;\n\t&lt;link\
+SF:x20rel=\"manifest\"\x20href=\"data:application/json;base64,eyJuYW1lIjoi
+SF:R3JlZW5Ib3JuIiwic2hvcnRfbmFtZSI6IkdyZWVuSG9ybiIsInN0YXJ0X3VybCI6Imh0dHA
+SF:6Ly9ncmVlbmhvcm4uaHRiOjMwMDAvIiwiaWNvbnMiOlt7InNyYyI6Imh0dHA6Ly9ncmVlbm
+SF:hvcm4uaHRiOjMwMDAvYXNzZXRzL2ltZy9sb2dvLnBuZyIsInR5cGUiOiJpbWFnZS9wbmciL
+SF:CJzaXplcyI6IjUxMng1MTIifSx7InNyYyI6Imh0dHA6Ly9ncmVlbmhvcm4uaHRiOjMwMDAv
+SF:YX")%r(Help,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20
+SF:text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\
+SF:x20Request")%r(HTTPOptions,1A4,"HTTP/1\.0\x20405\x20Method\x20Not\x20Al
+SF:lowed\r\nAllow:\x20HEAD\r\nAllow:\x20HEAD\r\nAllow:\x20GET\r\nCache-Con
+SF:trol:\x20max-age=0,\x20private,\x20must-revalidate,\x20no-transform\r\n
+SF:Set-Cookie:\x20i_like_gitea=b0bc6ae68de3fbb6;\x20Path=/;\x20HttpOnly;\x
+SF:20SameSite=Lax\r\nSet-Cookie:\x20_csrf=GoskDxug-DQHcGB4MQuqxdNJXCk6MTcz
+SF:MTQzMTQ2MjM2MjAzMTY4OA;\x20Path=/;\x20Max-Age=86400;\x20HttpOnly;\x20Sa
+SF:meSite=Lax\r\nX-Frame-Options:\x20SAMEORIGIN\r\nDate:\x20Tue,\x2012\x20
+SF:Nov\x202024\x2017:11:02\x20GMT\r\nContent-Length:\x200\r\n\r\n")%r(RTSP
+SF:Request,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text
+SF:/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20R
+SF:equest");
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 402.11 seconds
+
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>echo "$ip GreenHorn.htb" | sudo tee -a /etc/hosts
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──(root㉿kali)-[/home/angrybird/Desktop/Openvpn]
+└─# dirb http://GreenHorn.htb
+
+-----------------
+DIRB v2.22    
+By The Dark Raver
+-----------------
+
+START_TIME: Tue Nov 12 22:51:10 2024
+URL_BASE: http://GreenHorn.htb/
+WORDLIST_FILES: /usr/share/dirb/wordlists/common.txt
+
+-----------------
+
+GENERATED WORDS: 4612                                                          
+
+---- Scanning URL: http://GreenHorn.htb/ ----
++ http://GreenHorn.htb/admin.php (CODE:200|SIZE:4026)                                    
+==&gt; DIRECTORY: http://GreenHorn.htb/data/                                                
+==&gt; DIRECTORY: http://GreenHorn.htb/docs/                                                
+==&gt; DIRECTORY: http://GreenHorn.htb/files/                                               
+==&gt; DIRECTORY: http://GreenHorn.htb/images/                                              
++ http://GreenHorn.htb/javadoc (CODE:200|SIZE:92)                                        
++ http://GreenHorn.htb/java-plugin (CODE:200|SIZE:92)                                    
++ http://GreenHorn.htb/javascript (CODE:200|SIZE:92)                                     
++ http://GreenHorn.htb/local (CODE:200|SIZE:92)                                          
++ http://GreenHorn.htb/locale (CODE:200|SIZE:92)                                         
++ http://GreenHorn.htb/localstart (CODE:200|SIZE:92)                                     
++ http://GreenHorn.htb/location (CODE:200|SIZE:92)                                       
++ http://GreenHorn.htb/locations (CODE:200|SIZE:92)                                      
++ http://GreenHorn.htb/locator (CODE:200|SIZE:92)                                        
++ http://GreenHorn.htb/lock (CODE:200|SIZE:92)
++ http://GreenHorn.htb/locked (CODE:200|SIZE:92)                                         
++ http://GreenHorn.htb/lockout (CODE:200|SIZE:92)                                        
++ http://GreenHorn.htb/lofiversion (CODE:200|SIZE:92)                                    
++ http://GreenHorn.htb/log (CODE:200|SIZE:92)                                            
++ http://GreenHorn.htb/Log (CODE:200|SIZE:92)                                            
++ http://GreenHorn.htb/log4j (CODE:200|SIZE:92)                                          
++ http://GreenHorn.htb/robots.txt (CODE:200|SIZE:47)                                     
++ http://GreenHorn.htb/send_pwd (CODE:200|SIZE:2)                                        
++ http://GreenHorn.htb/send_to_friend (CODE:200|SIZE:2)                                  
++ http://GreenHorn.htb/sendform (CODE:200|SIZE:2)                                        
++ http://GreenHorn.htb/sendfriend (CODE:200|SIZE:2)                                      
++ http://GreenHorn.htb/sendmail (CODE:200|SIZE:2)                                        
++ http://GreenHorn.htb/sendmessage (CODE:200|SIZE:2)                                     
++ http://GreenHorn.htb/send-password (CODE:200|SIZE:2)                                   
++ http://GreenHorn.htb/sendpm (CODE:200|SIZE:2)                                          
++ http://GreenHorn.htb/sendthread (CODE:200|SIZE:2)                                      
++ http://GreenHorn.htb/sendto (CODE:200|SIZE:2)                                          
++ http://GreenHorn.htb/sendtofriend (CODE:200|SIZE:2)                                    
++ http://GreenHorn.htb/sensepost (CODE:200|SIZE:2)                                       
++ http://GreenHorn.htb/sensor (CODE:200|SIZE:2)                                          
++ http://GreenHorn.htb/sent (CODE:200|SIZE:2)                                            
++ http://GreenHorn.htb/seo (CODE:200|SIZE:2)                                             
++ http://GreenHorn.htb/serial (CODE:200|SIZE:2)                                          
++ http://GreenHorn.htb/serv (CODE:200|SIZE:2)                                            
++ http://GreenHorn.htb/serve (CODE:200|SIZE:2)                                           
++ http://GreenHorn.htb/server (CODE:200|SIZE:2)                                          
++ http://GreenHorn.htb/Server (CODE:200|SIZE:2)                                          
++ http://GreenHorn.htb/server_admin_small (CODE:200|SIZE:2)                              
++ http://GreenHorn.htb/server_stats (CODE:200|SIZE:2)                                    
++ http://GreenHorn.htb/ServerAdministrator (CODE:200|SIZE:2)                             
++ http://GreenHorn.htb/SERVER-INF (CODE:200|SIZE:2)                                      
++ http://GreenHorn.htb/server-info (CODE:200|SIZE:2)                                     
++ http://GreenHorn.htb/servers (CODE:200|SIZE:2)                                         
++ http://GreenHorn.htb/server-status (CODE:200|SIZE:2)                                   
++ http://GreenHorn.htb/service (CODE:200|SIZE:2)                                         
++ http://GreenHorn.htb/servicelist (CODE:200|SIZE:2)                                     
++ http://GreenHorn.htb/services (CODE:200|SIZE:2)                                        
++ http://GreenHorn.htb/Services (CODE:200|SIZE:2)                                        
++ http://GreenHorn.htb/servicio (CODE:200|SIZE:2)                                        
++ http://GreenHorn.htb/servicios (CODE:200|SIZE:2)                                       
++ http://GreenHorn.htb/servlet (CODE:200|SIZE:2)                                         
++ http://GreenHorn.htb/Servlet (CODE:200|SIZE:2)                                         
++ http://GreenHorn.htb/servlets (CODE:200|SIZE:2)                                        
++ http://GreenHorn.htb/Servlets (CODE:200|SIZE:2)                                        
++ http://GreenHorn.htb/servlets-examples (CODE:200|SIZE:2)
+</code></pre></div></div> <p>After discovering GreenHorn.htb’s admin panel (/admin.php), version 4.7.18 was identified, which is vulnerable to file upload reverse shell exploitation. Further enumeration revealed a service running on port 3000. I started reading code after some time i got ( <strong>GreenAdmin/GreenHorn -&gt; Data -&gt; Settings -&gt; Pass.php</strong> )</p> <p>In pass.php i got a hash cracked it with crackstation. I found the website is running on pluck 4.7.18 and I searched exploitDB for vulnerabilities associated with this version and I found out that there is a remote code execution exploit which allow potential attacker to upload malicious file in zip format on the website.</p> <p>With that i had uploded a php revershell in zip format.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>zip reverse_shell.zip reverse_shell.php
+</code></pre></div></div> <ul> <li> <p>In backgroung nc is running <strong>nc -lvnp 4444</strong></p> </li> <li>Next, I navigated to the option section on the website and clicked on “manage modules” and clicked on “install a module”. This displayed a webpage where I can upload a file. So, I uploaded the reverse-shell.zip file I have on my machine andgot a reverse shell response</li> <li>I changed the directory to home and list all the files/folders in it. Next, I tried to change the current user to junior by running the super user command: su junior and I was prompted to type a password, I used <strong>iloveyou1</strong> and I got the shell as.</li> </ul> <p><strong>junior@greenhorn:/home$</strong> I changed the directory to the root folder to get the user.txt file and I run the following command to read the file:</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cat user.txt
+</code></pre></div></div> <p>After the file has been successfully created, I will establish an http server on port 3333 to copy the file from the shell to my machine by running the following command:</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python3 -m http.server 3333
+
+wget greenhorn.htb:3333/openvas.pdf
+</code></pre></div></div> <p>Next, I will open the pdf file to view the content. In the pdf, a section to the file was blurred and this contains a secret text might be password to get the root flag. To view the content of the blurred part, I will upload the file to https://www.adobe.com/in/acrobat/online/extract-pdf-pages.html, a website for extracting embedded images in pdf files.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sidefromsidetheothersidesidefromsidetheotherside
+</code></pre></div></div> <p>After extracting the image i got this text i directly tired to login in via root user -</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>su root
+password: sidefromsidetheothersidesidefromsidetheotherside
+
+ls
+cleanup.sh  restart.sh  root.txt
+
+cat root.txt
+************
+</code></pre></div></div> <p>Tbh it’s a easy Machine.</p> </article> </div> </div> <footer class="fixed-bottom"> <div class="container mt-0" style="text-align: center;"> © Copyright 2024 Pavan Alapati. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="noopener noreferrer">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" target="_blank" rel="noopener noreferrer">al-folio</a> theme. </div> </footer> <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script> <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.2/dist/umd/popper.min.js" integrity="sha256-l/1pMF/+J4TThfgARS6KwWrk/egwuVvhRzfLAMQ6Ds4=" crossorigin="anonymous"></script> <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.min.js" integrity="sha256-SyTu6CwrfOhaznYZPoolVw2rxoY7lKYKQvqbtqN93HI=" crossorigin="anonymous"></script> <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@4/imagesloaded.pkgd.min.js"></script> <script defer src="/assets/js/masonry.js" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.0.6/dist/medium-zoom.min.js" integrity="sha256-EdPgYcPk/IIrw7FYeuJQexva49pVRZNmt3LculEr7zM=" crossorigin="anonymous"></script> <script src="/assets/js/zoom.js"></script> <script src="/assets/js/common.js"></script> <script type="text/javascript">window.MathJax={tex:{tags:"ams"}};</script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script> <script defer src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script> <script async src="https://www.googletagmanager.com/gtag/js?id="></script> <script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","");</script> </body> </html>
