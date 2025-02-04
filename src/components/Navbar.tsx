@@ -26,7 +26,7 @@ function Navbar() {
               <span>Blog</span>
             </Link>
             <a 
-              href="/public/resume.pdf" 
+              href="/john-doe-resume.pdf" 
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors"
