@@ -18,7 +18,7 @@ function Home() {
           </p>
           
           <p className="text-lg text-gray-400 mb-6">
-          I’m Pavan Alapati (aka AngryBird), a third-year undergraduate specializing in Computer Science (Cybersecurity) at KL University. My passion lies in Red Teaming and Threat Hunting, with a focus on Privilege Escalation, Defense Evasion, Credential Access, Lateral Movement, and other offensive security mechanisms.
+          (aka AngryBird), a third-year undergraduate specializing in Computer Science (Cybersecurity) at KL University. My passion lies in Red Teaming and Threat Hunting, with a focus on Privilege Escalation, Defense Evasion, Credential Access, Lateral Movement, and other offensive security mechanisms.
           </p>
           
           <p className="text-lg text-gray-400">
