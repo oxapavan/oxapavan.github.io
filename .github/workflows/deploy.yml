@@ -13,6 +13,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: github-pages  # Define the environment at the job level
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,5 +43,3 @@ jobs:
         uses: actions/deploy-pages@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-        environment:
-          name: github-pages
