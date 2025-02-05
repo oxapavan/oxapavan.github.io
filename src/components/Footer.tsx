@@ -7,7 +7,7 @@ function Footer() {
       <div className="container mx-auto px-4">
         <div className="flex justify-center space-x-8">
           <a
-            href="https://github.com/yourusername"
+            href="https://github.com/oxapavan"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-white transition-colors"
@@ -15,7 +15,7 @@ function Footer() {
             <Github className="w-5 h-5" />
           </a>
           <a
-            href="https://linkedin.com/in/yourusername"
+            href="https://www.linkedin.com/in/pavan-alapati/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-white transition-colors"
@@ -23,7 +23,7 @@ function Footer() {
             <Linkedin className="w-5 h-5" />
           </a>
           <a
-            href="https://t.me/yourusername"
+            href="https://t.me/AngryBirdOx01"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-white transition-colors"
@@ -32,7 +32,7 @@ function Footer() {
           </a>
         </div>
         <div className="text-center mt-2 text-sm text-gray-400">
-          © 2025 John Doe. All rights reserved.
+          © 2025 Pavan Alapati. All rights reserved.
         </div>
       </div>
     </footer>
