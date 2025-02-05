@@ -7,7 +7,7 @@ function Home() {
         <div className="flex justify-center mb-6">
           
           <img 
-            src="./assets/images/profile.jpg"  
+            src="/assets/images/profile.jpg"  
             className="w-48 h-48 rounded-full object-cover"
           />
           
