@@ -7,7 +7,7 @@ function Home() {
         <div className="flex justify-center mb-6">
           
           <img 
-            src="https://github.com/oxapavan/oxapavan.github.io/blob/main/public/assets/images/profile.jpg"  
+            src="https://raw.githubusercontent.com/oxapavan/oxapavan.github.io/main/public/assets/images/profile.jpg"  
             className="w-48 h-48 rounded-full object-cover"
           />
           
