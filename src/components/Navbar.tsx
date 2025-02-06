@@ -26,7 +26,7 @@ function Navbar() {
               <span>Blog</span>
             </Link>
             <a 
-              href="https://docs.google.com/gview?url=https://raw.githubusercontent.com/oxapavan/oxapavan.github.io/main/public/Pavan%20Alapati.pdf" 
+              href="https://raw.githubusercontent.com/oxapavan/oxapavan.github.io/main/public/Pavan%20Alapati.pdf" 
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors"
