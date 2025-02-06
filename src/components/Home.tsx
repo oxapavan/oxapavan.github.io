@@ -5,10 +5,12 @@ function Home() {
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-16">
         <div className="flex justify-center mb-6">
+          
           <img 
-            src="/assets/images/profile.jpg" 
+            src="https://imgur.com/a/iysCpA6"  
             className="w-48 h-48 rounded-full object-cover"
           />
+          
         </div>
         <h1 className="text-5xl font-bold mb-4">Pavan Alapati</h1>
         <h2 className="text-2xl text-cyan-500 mb-8">Cybersecurity Student & Researcher</h2>

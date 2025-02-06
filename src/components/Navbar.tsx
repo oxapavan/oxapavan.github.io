@@ -9,7 +9,7 @@ function Navbar() {
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2">
             <Shield className="w-8 h-8 text-cyan-500" />
-            <span className="text-xl font-bold">CyberPortfolio</span>
+            <span className="text-xl font-bold"> </span>
           </Link>
           
           <div className="hidden md:flex space-x-8">
