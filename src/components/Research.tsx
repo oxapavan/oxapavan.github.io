@@ -14,12 +14,6 @@ function Research() {
       date: "January 2024",
       description: "Comprehensive study of security vulnerabilities in common IoT devices.",
       link: "#"
-    },
-    {
-      title: "Blockchain Security: A Deep Dive",
-      date: "December 2023",
-      description: "Analysis of security measures in blockchain implementations.",
-      link: "#"
     }
   ];
 
