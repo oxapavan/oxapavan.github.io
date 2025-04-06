@@ -6,33 +6,30 @@ function Projects() {
 
   const projects = [
     {
-      title: "SecureNet Scanner",
+      title: "Generating Honeypot Alerts using Wazuh",
       description: "A network vulnerability scanner built with Python and Scapy.",
       tags: ["Python", "Network Security", "Penetration Testing"],
       github: "#",
       demo: "#",
-      details: `SecureNet Scanner is a comprehensive network security tool that helps identify vulnerabilities 
-                in network infrastructure. Key features include:
+      details: `This project focuses on enhancing threat intelligence and detection capabilities by integrating a custom-deployed honeypot with Wazuh SIEM on AWS and VirtualBox environments. The objective was to capture real-world attacker TTPs (Tactics, Techniques, and Procedures) and enrich threat feeds for proactive defense.
 
-                • Port scanning and service detection
-                • Vulnerability assessment and reporting
-                • Custom exploit detection modules
-                • Automated report generation
+                • Deployed and configured a honeypot environment to simulate vulnerable systems and attract malicious actors.
+                • Integrated the honeypot logs with Wazuh SIEM to generate real-time alerts and visualize attacker behaviors.
+                • Automated threat intelligence enrichment using captured Indicators of Compromise (IOCs) and log analysis.
+                • Streamlined incident response workflows, reducing response time by 40% through enhanced visibility and actionable alerting.
+                • Enabled proactive threat hunting by correlating honeypot data with existing threat feeds, improving overall detection accuracy.
                 
-                The tool is built using Python and leverages the Scapy library for packet manipulation and 
-                network discovery. It includes a modular architecture that allows for easy extension and 
-                customization of scanning capabilities.
-
                 Technical Implementation:
-                • Multi-threaded scanning for improved performance
-                • Custom protocol implementations for service detection
-                • Integration with common vulnerability databases
-                • Export capabilities for various report formats`
+                • Wazuh SIEM (Log analysis, ruleset tuning, threat detection
+                • AWS, Azure (Cloud infrastructure deployment)
+                • VirtualBox (Isolated lab environment)
+                • Custom Honeypot Deployment (Linux-based, configurable TTP traps)`
+      
     },
     {
       title: "Threat Intel Dashboard",
       description: "Real-time cyber threat intelligence dashboard using MISP API.",
-      tags: ["React", "TypeScript", "Cyber Threat Intelligence"],
+      tags: ["Wazuh", "Honeypot", "Threat Intelligence", "SIEM", "AWS", "Threat Hunting"],
       github: "#",
       demo: "#",
       details: `The Threat Intelligence Dashboard provides real-time visualization and analysis of cyber threats 
@@ -53,27 +50,20 @@ function Projects() {
                 • Redux for state management`
     },
     {
-      title: "IoT Security Framework",
-      description: "Security framework for IoT devices with emphasis on encryption.",
-      tags: ["C++", "IoT", "Encryption"],
+      title: "CloudRecon — AWS Enumeration & Misconfiguration Detection",
+      description: "CloudRecon is a Bash-based AWS enumeration tool designed to identify common security misconfigurations across core AWS services like IAM, S3, and EC2. The tool enhances cloud security posture by automating the discovery of insecure configurations and providing actionable insights.",
+      tags: ["AWS", "Cloud Security", "Bash", "AWS CLI", "Enumeration", "Reconnaissance", "Automation"],
       github: "#",
       demo: "#",
       details: `The IoT Security Framework provides a comprehensive solution for securing IoT devices and their 
                 communications. Core components include:
 
-                • End-to-end encryption for device communication
-                • Secure boot and firmware verification
-                • Remote device management and monitoring
-                • Automated security policy enforcement
+                • Developed custom Bash scripts utilizing AWS CLI for automated enumeration of AWS resources.
+                • Integrated jq for structured parsing of JSON outputs, enabling clean reporting and improved readability.
+                • Identified misconfigurations such as overly permissive IAM policies, publicly accessible S3 buckets, and insecure EC2 security group configurations.
+                • Streamlined cloud reconnaissance processes for red team assessments and cloud security audits.
+                • Provided detailed visibility into AWS resource configurations, enabling faster remediation and security hardening.
                 
-                The framework is implemented in C++ and designed to be lightweight enough for resource-constrained 
-                IoT devices while maintaining robust security features.
-
-                Security Features:
-                • AES-256 encryption for data protection
-                • X.509 certificate-based device authentication
-                • Secure key exchange protocols
-                • Runtime integrity checking`
     }
   ];
 
