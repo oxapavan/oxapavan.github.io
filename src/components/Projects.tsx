@@ -62,7 +62,7 @@ function Projects() {
                 • Integrated jq for structured parsing of JSON outputs, enabling clean reporting and improved readability.
                 • Identified misconfigurations such as overly permissive IAM policies, publicly accessible S3 buckets, and insecure EC2 security group configurations.
                 • Streamlined cloud reconnaissance processes for red team assessments and cloud security audits.
-                • Provided detailed visibility into AWS resource configurations, enabling faster remediation and security hardening.
+                • Provided detailed visibility into AWS resource configurations, enabling faster remediation and security hardening.`
                 
     }
   ];
