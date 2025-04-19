@@ -11,12 +11,6 @@ function Navbar() {
             <Shield className="w-8 h-8 text-cyan-500" />
             <span className="text-xl font-bold"> </span>
           </Link>
-          
-#         <div className="hidden md:flex space-x-8">
-#          <Link to="/research" className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors">
-#              <Flask className="w-4 h-4" />
-#              <span>Research</span>
-#            </Link>
             <Link to="/projects" className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors">
               <Code className="w-4 h-4" />
               <span>Projects</span>
