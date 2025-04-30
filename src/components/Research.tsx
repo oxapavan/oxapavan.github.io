@@ -4,17 +4,11 @@ import { FileText, Calendar } from 'lucide-react';
 function Research() {
   const research = [
     {
-      title: "Advanced Persistent Threat Detection Using Machine Learning",
-      date: "March 2024",
-      description: "Research on implementing ML algorithms to detect and prevent APT attacks.",
+      title: "From Pages to Payloads: Unmasking the Hidden Threat of Weaponized PDFs",
+      date: "Apr ~ 2025",
+      description: "Simulating a Host-based Attack Using Malicious PDFs",
       link: "#"
     },
-    {
-      title: "Zero-Day Vulnerability Analysis in IoT Devices",
-      date: "January 2024",
-      description: "Comprehensive study of security vulnerabilities in common IoT devices.",
-      link: "#"
-    }
   ];
 
   return (
