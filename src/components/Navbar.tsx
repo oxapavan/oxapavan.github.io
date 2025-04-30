@@ -11,6 +11,7 @@ function Navbar() {
             <Shield className="w-8 h-8 text-cyan-500" />
             <span className="text-xl font-bold"> </span>
           </Link>
+          <div className="flex space-x-4">
             <Link to="/projects" className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors">
               <Code className="w-4 h-4" />
               <span>Projects</span>
@@ -35,4 +36,4 @@ function Navbar() {
   );
 }
 
-export default Navbar
+export default Navbar;
