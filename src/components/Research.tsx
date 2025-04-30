@@ -1,43 +1,39 @@
 import React from 'react';
-import { FileText, Calendar } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Shield, FileText, FlaskRound as Flask, Code, BookOpen } from 'lucide-react';
 
-function Research() {
-  const research = [
-    {
-      title: "From Pages to Payloads: Unmasking the Hidden Threat of Weaponized PDFs",
-      date: "Apr ~ 2025",
-      description: "Simulating a Host-based Attack Using Malicious PDFs",
-      link: "#"
-    },
-  ];
-
+function Navbar() {
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold mb-8">Research</h1>
-      <div className="space-y-6">
-        {research.map((item, index) => (
-          <div key={index} className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="text-xl font-bold mb-2">{item.title}</h2>
-                <div className="flex items-center text-gray-400 mb-4">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  <span>{item.date}</span>
-                </div>
-                <p className="text-gray-400">{item.description}</p>
-              </div>
-              <a
-                href={item.link}
-                className="flex items-center text-cyan-500 hover:text-cyan-400"
-              >
-                <FileText className="w-5 h-5" />
-              </a>
-            </div>
+    <nav className="bg-gray-800 border-b border-gray-700">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          <Link to="/" className="flex items-center space-x-2">
+            <Shield className="w-8 h-8 text-cyan-500" />
+            <span className="text-xl font-bold"> </span>
+          </Link>
+          <div className="flex space-x-4">
+            <Link to="/projects" className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors">
+              <Code className="w-4 h-4" />
+              <span>Projects</span>
+            </Link>
+            <Link to="/blog" className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors">
+              <BookOpen className="w-4 h-4" />
+              <span>Blog</span>
+            </Link>
+            <a 
+              href="https://raw.githubusercontent.com/oxapavan/oxapavan.github.io/main/public/Pavan%20Alapati.pdf" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors"
+            >
+              <FileText className="w-4 h-4" />
+              <span>Resume</span>
+            </a>
           </div>
-        ))}
+        </div>
       </div>
-    </div>
+    </nav>
   );
 }
 
-export default Research
+export default Navbar;
