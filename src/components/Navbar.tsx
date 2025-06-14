@@ -17,14 +17,13 @@ function Navbar() {
               <span>Projects</span>
             </Link>
             <a 
-              href="https://raw.githubusercontent.com/oxapavan/oxapavan.github.io/main/public/Pavan%20Alapati.pdf"
-              target="_blank" 
-              rel="noopener noreferrer"
+              href="https://oxapavan.github.io/blog"
               className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors"
             >
               <BookOpen className="w-4 h-4" />
               <span>Blog</span>
-           </a>
+            </a>
+
             <a 
               href="https://raw.githubusercontent.com/oxapavan/oxapavan.github.io/main/public/Pavan%20Alapati.pdf" 
               target="_blank" 
