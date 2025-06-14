@@ -16,10 +16,15 @@ function Navbar() {
               <Code className="w-4 h-4" />
               <span>Projects</span>
             </Link>
-            <Link to="/blog" className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors">
+            <a 
+              href="https://raw.githubusercontent.com/oxapavan/oxapavan.github.io/main/public/Pavan%20Alapati.pdf"
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors"
+            >
               <BookOpen className="w-4 h-4" />
               <span>Blog</span>
-            </Link>
+           </a>
             <a 
               href="https://raw.githubusercontent.com/oxapavan/oxapavan.github.io/main/public/Pavan%20Alapati.pdf" 
               target="_blank" 
