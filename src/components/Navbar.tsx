@@ -17,7 +17,9 @@ function Navbar() {
               <span>Projects</span>
             </Link>
             <a 
-              href="https://oxapavan.github.io/blog"
+              href="https://pavan.gitbook.io/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors"
             >
               <BookOpen className="w-4 h-4" />
