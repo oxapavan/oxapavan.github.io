@@ -9,8 +9,7 @@ function Projects() {
       title: "Generating Honeypot Alerts using Wazuh",
       description: "A network vulnerability scanner built with Python and Scapy.",
       tags: ["Python", "Network Security", "Penetration Testing"],
-      github: "#",
-      demo: "#",
+      github: "https://github.com/oxapavan/Honeypot-Alerts-using-Wazuh",
       details: `This project focuses on enhancing threat intelligence and detection capabilities by integrating a custom-deployed honeypot with Wazuh SIEM on AWS and VirtualBox environments. The objective was to capture real-world attacker TTPs (Tactics, Techniques, and Procedures) and enrich threat feeds for proactive defense.
 
                 • Deployed and configured a honeypot environment to simulate vulnerable systems and attract malicious actors.
@@ -30,8 +29,7 @@ function Projects() {
       title: "Threat Intel Dashboard",
       description: "Real-time cyber threat intelligence dashboard using MISP API.",
       tags: ["Wazuh", "Honeypot", "Threat Intelligence", "SIEM", "AWS", "Threat Hunting"],
-      github: "#",
-      demo: "#",
+      github: "https://github.com/oxapavan/IOC-Extraction-through-N8N-Automation",
       details: `The Threat Intelligence Dashboard provides real-time visualization and analysis of cyber threats 
                 using data from multiple sources. Features include:
 
@@ -53,8 +51,7 @@ function Projects() {
       title: "CloudRecon — AWS Enumeration & Misconfiguration Detection",
       description: "CloudRecon is a Bash-based AWS enumeration tool designed to identify common security misconfigurations across core AWS services like IAM, S3, and EC2. The tool enhances cloud security posture by automating the discovery of insecure configurations and providing actionable insights.",
       tags: ["AWS", "Cloud Security", "Bash", "AWS CLI", "Enumeration", "Reconnaissance", "Automation"],
-      github: "#",
-      demo: "#",
+      github: "https://github.com/oxapavan/AWS-Recon",
       details: `The IoT Security Framework provides a comprehensive solution for securing IoT devices and their 
                 communications. Core components include:
 
